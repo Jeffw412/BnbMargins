@@ -495,6 +495,14 @@ export class ReportGenerator {
       )
     }
 
+    // Ensure we have some data to work with
+    if (transactions.length === 0) {
+      console.warn('No transactions found for the selected criteria')
+    }
+    if (properties.length === 0) {
+      console.warn('No properties found for the selected criteria')
+    }
+
     // Prepare report-specific data based on type
     const reportContext = this.prepareReportContext(
       reportData,
@@ -1259,31 +1267,41 @@ export class ReportGenerator {
   ): number {
     const { title, data, x, y, width, height, maxValue } = options
 
+    // Validate inputs
+    if (!data || data.length === 0) {
+      return y + 20
+    }
+
     // Title
     doc.setFontSize(12)
     doc.setTextColor(0, 0, 0)
     doc.text(title, x, y)
 
     const chartY = y + 10
-    const chartHeight = height - 20
-    const barWidth = (width / data.length) * 0.8
+    const chartHeight = Math.max(height - 20, 20) // Ensure minimum height
+    const barWidth = Math.max((width / data.length) * 0.8, 5) // Ensure minimum width
     const barSpacing = (width / data.length) * 0.2
 
-    const max = maxValue || Math.max(...data.map(d => d.value))
+    const max = maxValue || Math.max(...data.map(d => d.value), 1) // Ensure max is at least 1
 
     data.forEach((item, index) => {
-      const barHeight = (item.value / max) * chartHeight
+      // Ensure valid values
+      const value = isNaN(item.value) ? 0 : Math.max(item.value, 0)
+      const barHeight = max > 0 ? Math.max((value / max) * chartHeight, 0) : 0
       const barX = x + index * (barWidth + barSpacing)
       const barY = chartY + chartHeight - barHeight
 
-      // Draw bar
-      doc.setFillColor(...item.color)
-      doc.rect(barX, barY, barWidth, barHeight, 'F')
+      // Validate rectangle parameters before drawing
+      if (barWidth > 0 && barHeight > 0 && !isNaN(barX) && !isNaN(barY)) {
+        // Draw bar
+        doc.setFillColor(...item.color)
+        doc.rect(barX, barY, barWidth, barHeight, 'F')
+      }
 
       // Draw value label
       doc.setFontSize(8)
       doc.setTextColor(0, 0, 0)
-      const valueText = maxValue ? `${item.value}%` : `$${item.value.toLocaleString()}`
+      const valueText = maxValue ? `${value}%` : `$${value.toLocaleString()}`
       doc.text(valueText, barX + barWidth / 2, barY - 2, { align: 'center' })
 
       // Draw name label
@@ -1305,6 +1323,11 @@ export class ReportGenerator {
   ): number {
     const { title, data, x, y, radius } = options
 
+    // Validate inputs
+    if (!data || data.length === 0) {
+      return y + 20
+    }
+
     // Title
     doc.setFontSize(12)
     doc.setTextColor(0, 0, 0)
@@ -1312,7 +1335,12 @@ export class ReportGenerator {
 
     const centerX = x + radius + 20
     const centerY = y + radius + 20
-    const total = data.reduce((sum, item) => sum + item.value, 0)
+    const total = data.reduce((sum, item) => sum + Math.max(item.value, 0), 0)
+
+    // If total is 0, don't draw the chart
+    if (total === 0) {
+      return y + 40
+    }
 
     let currentAngle = 0
 
@@ -1328,7 +1356,12 @@ export class ReportGenerator {
 
       // Draw a simplified representation using rectangles for legend
       const legendY = y + 20 + index * 12
-      doc.rect(x + radius * 2 + 30, legendY, 8, 8, 'F')
+      const legendX = x + radius * 2 + 30
+
+      // Validate rectangle parameters
+      if (legendX > 0 && legendY > 0 && !isNaN(legendX) && !isNaN(legendY)) {
+        doc.rect(legendX, legendY, 8, 8, 'F')
+      }
 
       // Legend text
       doc.setFontSize(8)

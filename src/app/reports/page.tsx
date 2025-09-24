@@ -584,15 +584,30 @@ export default function ReportsPage() {
 
             <div className="space-y-2">
               <Label>Properties</Label>
-              <Select>
+              <Select
+                value={selectedProperties.length > 0 ? selectedProperties.join(',') : 'all'}
+                onValueChange={value => {
+                  if (value === 'all') {
+                    setSelectedProperties([])
+                  } else {
+                    setSelectedProperties(value.split(','))
+                  }
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select properties to include" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Properties</SelectItem>
-                  <SelectItem value="1">Downtown Loft</SelectItem>
-                  <SelectItem value="2">Beachside Villa</SelectItem>
-                  <SelectItem value="3">Mountain Cabin</SelectItem>
+                  <SelectItem value="Downtown Loft">Downtown Loft</SelectItem>
+                  <SelectItem value="Beachside Villa">Beachside Villa</SelectItem>
+                  <SelectItem value="Mountain Cabin">Mountain Cabin</SelectItem>
+                  <SelectItem value="Downtown Loft,Beachside Villa">
+                    Downtown + Beachside
+                  </SelectItem>
+                  <SelectItem value="Beachside Villa,Mountain Cabin">
+                    Beachside + Mountain
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
