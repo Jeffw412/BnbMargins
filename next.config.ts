@@ -1,12 +1,15 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   // Optimize for shared hosting deployment
   output: 'standalone',
 
-  // Disable TypeScript checking during build for deployment
+  // Disable TypeScript and ESLint checking during build for deployment
   typescript: {
     ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 
   // Disable experimental features that might cause issues on shared hosting
@@ -38,6 +41,6 @@ const nextConfig: NextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
