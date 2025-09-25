@@ -222,6 +222,52 @@ const mockTransactions: TransactionData[] = [
     description: 'Quarterly property tax',
     date: '2024-03-31',
   },
+  // 2025 data for current testing
+  {
+    id: '21',
+    property_name: 'Downtown Loft',
+    type: 'income',
+    category: 'Booking Revenue',
+    amount: 1400,
+    description: 'Airbnb booking - 6 nights',
+    date: '2025-01-15',
+  },
+  {
+    id: '22',
+    property_name: 'Downtown Loft',
+    type: 'expense',
+    category: 'Cleaning',
+    amount: 90,
+    description: 'Professional cleaning service',
+    date: '2025-01-16',
+  },
+  {
+    id: '23',
+    property_name: 'Beachside Villa',
+    type: 'income',
+    category: 'Booking Revenue',
+    amount: 2800,
+    description: 'Airbnb booking - 8 nights',
+    date: '2025-01-20',
+  },
+  {
+    id: '24',
+    property_name: 'Mountain Cabin',
+    type: 'income',
+    category: 'Booking Revenue',
+    amount: 900,
+    description: 'Airbnb booking - 4 nights',
+    date: '2025-01-25',
+  },
+  {
+    id: '25',
+    property_name: 'Beachside Villa',
+    type: 'expense',
+    category: 'Maintenance',
+    amount: 200,
+    description: 'Pool maintenance',
+    date: '2025-02-01',
+  },
 ]
 
 const mockProperties: PropertyData[] = [
@@ -495,6 +541,15 @@ export class ReportGenerator {
       )
     }
 
+    // Debug logging to understand data flow
+    console.log('=== REPORT GENERATION DEBUG ===')
+    console.log('Original mock transactions:', mockTransactions.length)
+    console.log('Date range:', reportData.dateRange)
+    console.log('Selected properties:', reportData.properties)
+    console.log('Filtered transactions:', transactions.length)
+    console.log('Filtered properties:', properties.length)
+    console.log('Sample transactions:', transactions.slice(0, 3))
+
     // Ensure we have some data to work with
     if (transactions.length === 0) {
       console.warn('No transactions found for the selected criteria')
@@ -545,12 +600,26 @@ export class ReportGenerator {
   }
 
   private calculateSummary(transactions: TransactionData[], properties: PropertyData[]) {
-    const totalIncome = transactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0)
-    const totalExpenses = transactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0)
+    console.log('=== CALCULATE SUMMARY DEBUG ===')
+    console.log('Transactions received:', transactions.length)
+    console.log('Properties received:', properties.length)
+
+    const incomeTransactions = transactions.filter(t => t.type === 'income')
+    const expenseTransactions = transactions.filter(t => t.type === 'expense')
+
+    console.log(
+      'Income transactions:',
+      incomeTransactions.length,
+      incomeTransactions.map(t => t.amount)
+    )
+    console.log(
+      'Expense transactions:',
+      expenseTransactions.length,
+      expenseTransactions.map(t => t.amount)
+    )
+
+    const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0)
+    const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0)
     const netProfit = totalIncome - totalExpenses
 
     const totalMonthlyRevenue = properties.reduce((sum, p) => sum + p.monthly_revenue, 0)
@@ -560,7 +629,7 @@ export class ReportGenerator {
         ? properties.reduce((sum, p) => sum + p.occupancy_rate, 0) / properties.length
         : 0
 
-    return {
+    const summary = {
       totalIncome,
       totalExpenses,
       netProfit,
@@ -569,6 +638,9 @@ export class ReportGenerator {
       avgOccupancyRate,
       profitMargin: totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0,
     }
+
+    console.log('Calculated summary:', summary)
+    return summary
   }
 
   private calculateComparisons(
@@ -1112,7 +1184,8 @@ export class ReportGenerator {
     context: any,
     yPosition: number
   ): number {
-    if (yPosition > 150) {
+    // Check if we need a new page for charts (more conservative)
+    if (yPosition > 120) {
       doc.addPage()
       yPosition = 20
     }
@@ -1142,6 +1215,11 @@ export class ReportGenerator {
   }
 
   private addFinancialCharts(doc: any, context: any, yPosition: number): number {
+    console.log('=== CHART DATA DEBUG ===')
+    console.log('Context summary:', context.summary)
+    console.log('Total Income for chart:', context.summary.totalIncome)
+    console.log('Total Expenses for chart:', context.summary.totalExpenses)
+
     // Income vs Expenses Bar Chart
     yPosition = this.drawBarChart(doc, {
       title: 'Income vs Expenses',
@@ -1154,7 +1232,7 @@ export class ReportGenerator {
       width: 170,
       height: 80,
     })
-    yPosition += 100
+    yPosition += 20 // Reduced spacing to prevent cutoff
 
     // Property Revenue Pie Chart
     if (context.properties.length > 0) {
@@ -1171,7 +1249,7 @@ export class ReportGenerator {
         y: yPosition,
         radius: 40,
       })
-      yPosition += 100
+      yPosition += 20 // Reduced spacing to prevent cutoff
     }
 
     return yPosition

@@ -312,4 +312,45 @@ body {
   font-weight: 600;
   color: hsl(var(--muted-foreground));
   text-align: center;
+  width: 2.25rem !important;
+  min-width: 2.25rem !important;
+  padding: 0.25rem !important;
+}
+
+/* Ensure proper spacing for calendar table */
+.rdp-table {
+  width: 100% !important;
+  border-spacing: 0 !important;
+}
+
+/* Fix calendar row spacing */
+.rdp-head_row {
+  display: flex !important;
+  justify-content: space-between !important;
+}
+
+/* Improve day cell spacing */
+.rdp-cell {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  text-align: center !important;
+}
+
+/* Better range selection styling */
+.rdp-day_range_start.rdp-day_selected {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-radius: 0.375rem 0 0 0.375rem !important;
+}
+
+.rdp-day_range_end.rdp-day_selected {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-radius: 0 0.375rem 0.375rem 0 !important;
+}
+
+.rdp-day_range_middle.rdp-day_selected {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  border-radius: 0 !important;
 }
