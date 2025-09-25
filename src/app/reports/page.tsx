@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuth } from '@/contexts/auth-context'
 import { useSettings } from '@/contexts/settings-context'
 import { reportGenerator } from '@/lib/report-generator'
 import { formatDate } from '@/lib/utils'
@@ -124,6 +125,7 @@ interface ReportTemplate {
 }
 
 export default function ReportsPage() {
+  const { user } = useAuth()
   const { currency } = useSettings()
   const [reportTemplates, setReportTemplates] = useState<ReportTemplate[]>(mockReportTemplates)
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false)
@@ -162,6 +164,7 @@ export default function ReportsPage() {
         includeCharts,
         includeTransactions,
         includeComparisons,
+        userId: user?.id, // Pass the current user ID
       })
 
       toast.success('Report generated successfully!')
@@ -191,7 +194,7 @@ export default function ReportsPage() {
   const handleQuickReport = async (type: string) => {
     try {
       toast.info('Generating quick report...')
-      await reportGenerator.generateQuickReport(type)
+      await reportGenerator.generateQuickReport(type, user?.id)
       toast.success('Quick report generated successfully!')
     } catch (error) {
       console.error('Error generating quick report:', error)
@@ -218,6 +221,7 @@ export default function ReportsPage() {
         includeCharts: true,
         includeTransactions: true,
         includeComparisons: false,
+        userId: user?.id, // Pass the current user ID
       })
 
       toast.success('Report downloaded successfully!')

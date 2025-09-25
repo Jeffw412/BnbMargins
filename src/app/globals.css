@@ -307,26 +307,33 @@ body {
   color: hsl(var(--primary)) !important;
 }
 
-/* Fix day of week headers */
+/* Fix day of week headers - improved spacing and visibility */
 .rdp-head_cell {
-  font-weight: 600;
-  color: hsl(var(--muted-foreground));
-  text-align: center;
+  font-weight: 600 !important;
+  color: hsl(var(--muted-foreground)) !important;
+  text-align: center !important;
   width: 2.25rem !important;
   min-width: 2.25rem !important;
-  padding: 0.25rem !important;
+  max-width: 2.25rem !important;
+  padding: 0.5rem 0.25rem !important;
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Ensure proper spacing for calendar table */
 .rdp-table {
   width: 100% !important;
   border-spacing: 0 !important;
+  table-layout: fixed !important;
 }
 
 /* Fix calendar row spacing */
 .rdp-head_row {
   display: flex !important;
   justify-content: space-between !important;
+  width: 100% !important;
 }
 
 /* Improve day cell spacing */
@@ -334,6 +341,12 @@ body {
   width: 2.25rem !important;
   height: 2.25rem !important;
   text-align: center !important;
+  flex: 1 !important;
+  min-width: 2.25rem !important;
+  max-width: 2.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Better range selection styling */
@@ -353,4 +366,26 @@ body {
   background-color: hsl(var(--accent)) !important;
   color: hsl(var(--accent-foreground)) !important;
   border-radius: 0 !important;
+}
+
+/* Ensure range highlighting is visible */
+.rdp-day_range_start,
+.rdp-day_range_end,
+.rdp-day_range_middle {
+  position: relative !important;
+}
+
+/* Fix calendar month grid layout */
+.rdp-month {
+  width: 100% !important;
+}
+
+.rdp-tbody {
+  width: 100% !important;
+}
+
+.rdp-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
 }
