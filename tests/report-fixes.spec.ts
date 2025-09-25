@@ -7,12 +7,7 @@ test.describe('Report Generation Fixes', () => {
 
   test('should generate reports with charts without errors', async ({ page }) => {
     // Click on Financial Report Generate button
-    await page
-      .locator('text=Financial Reports')
-      .locator('..')
-      .locator('..')
-      .locator('button:has-text("Generate")')
-      .click()
+    await page.getByTestId('quick-generate-financial-btn').click()
 
     // Wait for generate dialog to open
     await expect(page.locator('[role="dialog"]')).toBeVisible()
@@ -21,7 +16,7 @@ test.describe('Report Generation Fixes', () => {
     await page.click('text=PDF')
 
     // Select properties (test the fixed property selection)
-    await page.click('text=Select properties to include')
+    await page.getByTestId('property-selection-trigger').click()
     await page.click('text=Downtown Loft')
 
     // Select date range (test the improved date picker)
@@ -90,13 +85,13 @@ test.describe('Report Generation Fixes', () => {
       .click()
 
     // Open date picker
-    await page.click('text=Select date range for report')
+    await page.getByTestId('date-range-picker-trigger').click()
 
     // Calendar should be visible
-    await expect(page.locator('.rdp')).toBeVisible()
+    await expect(page.getByTestId('date-range-calendar')).toBeVisible()
 
     // Day headers should be properly aligned
-    await expect(page.locator('.rdp-head_cell')).toHaveCount(7)
+    await expect(page.locator('[data-testid="date-range-calendar"] .head_cell')).toHaveCount(7)
 
     // Click on two dates to create a range
     const dates = page.locator('[data-day]')
@@ -110,15 +105,10 @@ test.describe('Report Generation Fixes', () => {
 
   test('should calculate non-zero financial figures', async ({ page }) => {
     // Click on Financial Report Generate button
-    await page
-      .locator('text=Financial Reports')
-      .locator('..')
-      .locator('..')
-      .locator('button:has-text("Generate")')
-      .click()
+    await page.getByTestId('quick-generate-financial-btn').click()
 
     // Select "All Properties" to ensure we get data
-    await page.click('text=Select properties to include')
+    await page.getByTestId('property-selection-trigger').click()
     await page.click('text=All Properties')
 
     // Disable date filtering to get all transactions
@@ -156,7 +146,7 @@ test.describe('Report Generation Fixes', () => {
       .click()
 
     // Test property selection dropdown
-    await page.click('text=Select properties to include')
+    await page.getByTestId('property-selection-trigger').click()
 
     // Should show all property options
     await expect(page.locator('text=All Properties')).toBeVisible()

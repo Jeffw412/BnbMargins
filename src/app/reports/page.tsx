@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/contexts/auth-context'
 import { useSettings } from '@/contexts/settings-context'
 import { reportGenerator } from '@/lib/report-generator'
+import { db } from '@/lib/supabase'
 import { formatDate } from '@/lib/utils'
 import {
   Building2,
@@ -45,7 +46,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 import { toast } from 'sonner'
 
@@ -128,6 +129,7 @@ export default function ReportsPage() {
   const { user } = useAuth()
   const { currency } = useSettings()
   const [reportTemplates, setReportTemplates] = useState<ReportTemplate[]>(mockReportTemplates)
+  const [properties, setProperties] = useState<any[]>([])
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false)
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false)
   const [selectedReportType, setSelectedReportType] = useState('')
@@ -139,6 +141,24 @@ export default function ReportsPage() {
   const [includeTransactions, setIncludeTransactions] = useState(false)
   const [includeComparisons, setIncludeComparisons] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+
+  // Fetch properties from database
+  useEffect(() => {
+    const fetchProperties = async () => {
+      if (!user?.id) return
+
+      try {
+        const result = await db.properties.getAll(user.id)
+        if (result.data) {
+          setProperties(result.data)
+        }
+      } catch (error) {
+        console.error('Error fetching properties:', error)
+      }
+    }
+
+    fetchProperties()
+  }, [user?.id])
 
   const handleGenerateReport = async () => {
     if (!selectedReportType) {
@@ -268,7 +288,10 @@ export default function ReportsPage() {
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
-          <Button onClick={() => setIsGenerateDialogOpen(true)}>
+          <Button
+            onClick={() => setIsGenerateDialogOpen(true)}
+            data-testid="main-generate-report-btn"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Generate Report
           </Button>
@@ -301,6 +324,7 @@ export default function ReportsPage() {
                         setSelectedReportType(type.value)
                         setIsGenerateDialogOpen(true)
                       }}
+                      data-testid={`quick-generate-${type.value}-btn`}
                     >
                       Generate
                     </Button>
@@ -598,20 +622,16 @@ export default function ReportsPage() {
                   }
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger data-testid="property-selection-trigger">
                   <SelectValue placeholder="Select properties to include" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Properties</SelectItem>
-                  <SelectItem value="Downtown Loft">Downtown Loft</SelectItem>
-                  <SelectItem value="Beachside Villa">Beachside Villa</SelectItem>
-                  <SelectItem value="Mountain Cabin">Mountain Cabin</SelectItem>
-                  <SelectItem value="Downtown Loft,Beachside Villa">
-                    Downtown + Beachside
-                  </SelectItem>
-                  <SelectItem value="Beachside Villa,Mountain Cabin">
-                    Beachside + Mountain
-                  </SelectItem>
+                  {properties.map(property => (
+                    <SelectItem key={property.id} value={property.name}>
+                      {property.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -651,7 +671,11 @@ export default function ReportsPage() {
             <Button variant="outline" onClick={() => setIsGenerateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleGenerateReport} disabled={!selectedReportType || isGenerating}>
+            <Button
+              onClick={handleGenerateReport}
+              disabled={!selectedReportType || isGenerating}
+              data-testid="dialog-generate-report-btn"
+            >
               <Download className="mr-2 h-4 w-4" />
               {isGenerating ? 'Generating...' : 'Generate Report'}
             </Button>

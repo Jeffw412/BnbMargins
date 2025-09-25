@@ -1,6 +1,7 @@
 import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import * as XLSX from 'xlsx'
+import { db } from './supabase'
 
 // Types for report data
 export interface ReportData {
@@ -38,268 +39,7 @@ export interface PropertyData {
   total_reviews: number
 }
 
-// Enhanced mock data - in real app this would come from Supabase
-const mockTransactions: TransactionData[] = [
-  // January 2024 transactions
-  {
-    id: '1',
-    property_name: 'Downtown Loft',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 1200,
-    description: 'Airbnb booking - 5 nights',
-    date: '2024-01-15',
-  },
-  {
-    id: '2',
-    property_name: 'Downtown Loft',
-    type: 'expense',
-    category: 'Cleaning',
-    amount: 80,
-    description: 'Professional cleaning service',
-    date: '2024-01-16',
-  },
-  {
-    id: '3',
-    property_name: 'Beachside Villa',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 2400,
-    description: 'Airbnb booking - 7 nights',
-    date: '2024-01-18',
-  },
-  {
-    id: '4',
-    property_name: 'Downtown Loft',
-    type: 'expense',
-    category: 'Maintenance',
-    amount: 150,
-    description: 'Plumbing repair',
-    date: '2024-01-20',
-  },
-  {
-    id: '5',
-    property_name: 'Beachside Villa',
-    type: 'expense',
-    category: 'Utilities',
-    amount: 120,
-    description: 'Electricity bill',
-    date: '2024-01-22',
-  },
-  {
-    id: '6',
-    property_name: 'Mountain Cabin',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 800,
-    description: 'Airbnb booking - 4 nights',
-    date: '2024-01-25',
-  },
-  {
-    id: '7',
-    property_name: 'Downtown Loft',
-    type: 'expense',
-    category: 'Insurance',
-    amount: 200,
-    description: 'Property insurance premium',
-    date: '2024-01-28',
-  },
-  {
-    id: '8',
-    property_name: 'Beachside Villa',
-    type: 'expense',
-    category: 'Property Management',
-    amount: 240,
-    description: 'Management fee - 10% of revenue',
-    date: '2024-01-30',
-  },
-  // February 2024 transactions
-  {
-    id: '9',
-    property_name: 'Downtown Loft',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 1800,
-    description: 'Airbnb booking - 6 nights',
-    date: '2024-02-05',
-  },
-  {
-    id: '10',
-    property_name: 'Mountain Cabin',
-    type: 'expense',
-    category: 'Supplies',
-    amount: 150,
-    description: 'Linens and toiletries',
-    date: '2024-02-08',
-  },
-  {
-    id: '11',
-    property_name: 'Beachside Villa',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 3200,
-    description: 'Airbnb booking - 8 nights',
-    date: '2024-02-12',
-  },
-  {
-    id: '12',
-    property_name: 'Downtown Loft',
-    type: 'expense',
-    category: 'Repairs',
-    amount: 300,
-    description: 'HVAC maintenance',
-    date: '2024-02-15',
-  },
-  {
-    id: '13',
-    property_name: 'Mountain Cabin',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 1200,
-    description: 'Airbnb booking - 5 nights',
-    date: '2024-02-20',
-  },
-  {
-    id: '14',
-    property_name: 'Beachside Villa',
-    type: 'expense',
-    category: 'Cleaning',
-    amount: 120,
-    description: 'Deep cleaning service',
-    date: '2024-02-22',
-  },
-  // March 2024 transactions
-  {
-    id: '15',
-    property_name: 'Downtown Loft',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 2100,
-    description: 'Airbnb booking - 7 nights',
-    date: '2024-03-05',
-  },
-  {
-    id: '16',
-    property_name: 'Mountain Cabin',
-    type: 'expense',
-    category: 'Utilities',
-    amount: 180,
-    description: 'Heating and electricity',
-    date: '2024-03-10',
-  },
-  {
-    id: '17',
-    property_name: 'Beachside Villa',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 2800,
-    description: 'Airbnb booking - 6 nights',
-    date: '2024-03-15',
-  },
-  {
-    id: '18',
-    property_name: 'Downtown Loft',
-    type: 'expense',
-    category: 'Marketing',
-    amount: 100,
-    description: 'Professional photography',
-    date: '2024-03-18',
-  },
-  {
-    id: '19',
-    property_name: 'Mountain Cabin',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 1600,
-    description: 'Airbnb booking - 6 nights',
-    date: '2024-03-22',
-  },
-  {
-    id: '20',
-    property_name: 'Beachside Villa',
-    type: 'expense',
-    category: 'Property Tax',
-    amount: 450,
-    description: 'Quarterly property tax',
-    date: '2024-03-31',
-  },
-  // 2025 data for current testing
-  {
-    id: '21',
-    property_name: 'Downtown Loft',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 1400,
-    description: 'Airbnb booking - 6 nights',
-    date: '2025-01-15',
-  },
-  {
-    id: '22',
-    property_name: 'Downtown Loft',
-    type: 'expense',
-    category: 'Cleaning',
-    amount: 90,
-    description: 'Professional cleaning service',
-    date: '2025-01-16',
-  },
-  {
-    id: '23',
-    property_name: 'Beachside Villa',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 2800,
-    description: 'Airbnb booking - 8 nights',
-    date: '2025-01-20',
-  },
-  {
-    id: '24',
-    property_name: 'Mountain Cabin',
-    type: 'income',
-    category: 'Booking Revenue',
-    amount: 900,
-    description: 'Airbnb booking - 4 nights',
-    date: '2025-01-25',
-  },
-  {
-    id: '25',
-    property_name: 'Beachside Villa',
-    type: 'expense',
-    category: 'Maintenance',
-    amount: 200,
-    description: 'Pool maintenance',
-    date: '2025-02-01',
-  },
-]
-
-const mockProperties: PropertyData[] = [
-  {
-    id: '1',
-    name: 'Downtown Loft',
-    monthly_revenue: 5100, // Updated based on transaction data
-    monthly_expenses: 730, // Updated based on transaction data
-    occupancy_rate: 85,
-    avg_rating: 4.9,
-    total_reviews: 32,
-  },
-  {
-    id: '2',
-    name: 'Beachside Villa',
-    monthly_revenue: 8400, // Updated based on transaction data
-    monthly_expenses: 930, // Updated based on transaction data
-    occupancy_rate: 92,
-    avg_rating: 4.8,
-    total_reviews: 45,
-  },
-  {
-    id: '3',
-    name: 'Mountain Cabin',
-    monthly_revenue: 3600, // Updated based on transaction data
-    monthly_expenses: 330, // Updated based on transaction data
-    occupancy_rate: 78,
-    avg_rating: 4.7,
-    total_reviews: 28,
-  },
-]
+// Database types for report generation
 
 // Additional data structures for enhanced reporting
 export interface MonthlyPerformanceData {
@@ -339,136 +79,6 @@ export interface ComparisonData {
     occupancy: number
   }
 }
-
-// Mock monthly performance data
-const mockMonthlyPerformance: MonthlyPerformanceData[] = [
-  // January 2024
-  {
-    month: 'Jan 2024',
-    property_name: 'Downtown Loft',
-    revenue: 1200,
-    expenses: 430,
-    profit: 770,
-    occupancy_rate: 80,
-    bookings: 1,
-  },
-  {
-    month: 'Jan 2024',
-    property_name: 'Beachside Villa',
-    revenue: 2400,
-    expenses: 360,
-    profit: 2040,
-    occupancy_rate: 90,
-    bookings: 1,
-  },
-  {
-    month: 'Jan 2024',
-    property_name: 'Mountain Cabin',
-    revenue: 800,
-    expenses: 0,
-    profit: 800,
-    occupancy_rate: 75,
-    bookings: 1,
-  },
-  // February 2024
-  {
-    month: 'Feb 2024',
-    property_name: 'Downtown Loft',
-    revenue: 1800,
-    expenses: 300,
-    profit: 1500,
-    occupancy_rate: 85,
-    bookings: 1,
-  },
-  {
-    month: 'Feb 2024',
-    property_name: 'Beachside Villa',
-    revenue: 3200,
-    expenses: 120,
-    profit: 3080,
-    occupancy_rate: 95,
-    bookings: 1,
-  },
-  {
-    month: 'Feb 2024',
-    property_name: 'Mountain Cabin',
-    revenue: 1200,
-    expenses: 150,
-    profit: 1050,
-    occupancy_rate: 80,
-    bookings: 1,
-  },
-  // March 2024
-  {
-    month: 'Mar 2024',
-    property_name: 'Downtown Loft',
-    revenue: 2100,
-    expenses: 100,
-    profit: 2000,
-    occupancy_rate: 90,
-    bookings: 1,
-  },
-  {
-    month: 'Mar 2024',
-    property_name: 'Beachside Villa',
-    revenue: 2800,
-    expenses: 450,
-    profit: 2350,
-    occupancy_rate: 88,
-    bookings: 1,
-  },
-  {
-    month: 'Mar 2024',
-    property_name: 'Mountain Cabin',
-    revenue: 1600,
-    expenses: 180,
-    profit: 1420,
-    occupancy_rate: 82,
-    bookings: 1,
-  },
-]
-
-// Mock tax category data
-const mockTaxCategories: TaxCategoryData[] = [
-  {
-    category: 'Cleaning',
-    amount: 200,
-    description: 'Professional cleaning services',
-    deductible: true,
-  },
-  {
-    category: 'Maintenance',
-    amount: 450,
-    description: 'Property repairs and maintenance',
-    deductible: true,
-  },
-  {
-    category: 'Utilities',
-    amount: 300,
-    description: 'Electricity, heating, water',
-    deductible: true,
-  },
-  {
-    category: 'Insurance',
-    amount: 200,
-    description: 'Property insurance premiums',
-    deductible: true,
-  },
-  {
-    category: 'Property Management',
-    amount: 240,
-    description: 'Management fees',
-    deductible: true,
-  },
-  {
-    category: 'Supplies',
-    amount: 150,
-    description: 'Linens, toiletries, amenities',
-    deductible: true,
-  },
-  { category: 'Marketing', amount: 100, description: 'Photography, advertising', deductible: true },
-  { category: 'Property Tax', amount: 450, description: 'Local property taxes', deductible: false },
-]
 
 export class ReportGenerator {
   private formatCurrency(amount: number): string {
@@ -661,43 +271,16 @@ export class ReportGenerator {
       }
     }
 
-    // If no data from database or no userId, use mock data as fallback
-    if (transactions.length === 0 || properties.length === 0) {
-      console.warn('Using mock data as fallback')
+    // Ensure we have a userId to fetch data
+    if (!reportData.userId) {
+      throw new Error('User ID is required to generate reports')
+    }
 
-      // Filter mock data based on criteria
-      transactions = this.filterDataByDateRange(mockTransactions, reportData.dateRange)
-      transactions = this.filterDataByProperties(transactions, reportData.properties)
-
-      properties = this.filterDataByProperties(mockProperties, reportData.properties, 'name')
-
-      // Filter monthly performance data
-      monthlyPerformance = this.filterDataByDateRange(
-        mockMonthlyPerformance,
-        reportData.dateRange,
-        'month'
+    // If no data from database, show appropriate message
+    if (transactions.length === 0 && properties.length === 0) {
+      throw new Error(
+        'No data available to generate report. Please add properties and transactions first.'
       )
-      if (reportData.properties.length > 0) {
-        monthlyPerformance = monthlyPerformance.filter(item =>
-          reportData.properties.includes(item.property_name)
-        )
-      }
-
-      // Ensure we have data to work with - provide fallback if needed
-      if (transactions.length === 0) {
-        console.warn('No transactions found for the selected criteria, using fallback data')
-        transactions = mockTransactions.slice(0, 10) // Use first 10 transactions as fallback
-      }
-
-      if (properties.length === 0) {
-        console.warn('No properties found for the selected criteria, using all properties')
-        properties = mockProperties // Use all properties as fallback
-      }
-
-      if (monthlyPerformance.length === 0) {
-        console.warn('No monthly performance data found, using fallback data')
-        monthlyPerformance = mockMonthlyPerformance.slice(0, 6) // Use first 6 months as fallback
-      }
     }
 
     // Prepare report-specific data based on type
@@ -732,7 +315,7 @@ export class ReportGenerator {
       properties,
       monthlyPerformance,
       summary: this.calculateSummary(transactions, properties),
-      taxCategories: reportData.type === 'tax' ? mockTaxCategories : [],
+      taxCategories: reportData.type === 'tax' ? this.generateTaxCategories(transactions) : [],
       comparisons: reportData.includeComparisons
         ? this.calculateComparisons(monthlyPerformance)
         : null,
@@ -827,6 +410,29 @@ export class ReportGenerator {
       previous_period: previousTotals,
       change_percentage: changePercentage,
     }
+  }
+
+  private generateTaxCategories(transactions: TransactionData[]): TaxCategoryData[] {
+    const categoryMap = new Map<string, { amount: number; description: string }>()
+
+    // Group expenses by category
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(transaction => {
+        const existing = categoryMap.get(transaction.category) || { amount: 0, description: '' }
+        categoryMap.set(transaction.category, {
+          amount: existing.amount + transaction.amount,
+          description: transaction.description || transaction.category,
+        })
+      })
+
+    // Convert to TaxCategoryData format
+    return Array.from(categoryMap.entries()).map(([category, data]) => ({
+      category,
+      amount: data.amount,
+      description: data.description,
+      deductible: true, // Most rental property expenses are deductible
+    }))
   }
 
   private async generatePDF(reportData: ReportData, context: any): Promise<void> {

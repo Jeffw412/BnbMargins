@@ -36,9 +36,9 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
           'h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground'
         ),
         day_range_end:
-          'day-range-end bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-r-md',
+          'day-range-end rdp-day_range_end bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-r-md',
         day_selected:
-          'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
+          'rdp-day_selected bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
         day_today: 'bg-accent text-accent-foreground font-semibold',
         day_outside:
           'day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30',
@@ -46,7 +46,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         day_range_middle:
           'aria-selected:bg-accent aria-selected:text-accent-foreground rounded-none bg-accent/50',
         day_range_start:
-          'day-range-start bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-l-md',
+          'day-range-start rdp-day_range_start bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-l-md',
         day_hidden: 'invisible',
         ...classNames,
       }}

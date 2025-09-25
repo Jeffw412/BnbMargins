@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { useSettings } from '@/contexts/settings-context'
 import { db } from '@/lib/supabase'
 import { calculateAirbnbServiceFee, formatCurrency } from '@/lib/utils'
+import { Database } from '@/types/database'
 import {
   Building2,
   Calendar,
@@ -38,154 +39,51 @@ import {
   YAxis,
 } from 'recharts'
 
-// Sample data for demonstration
-const monthlyData = [
-  { name: 'Jan', income: 4200, expenses: 2800, profit: 1400 },
-  { name: 'Feb', income: 3800, expenses: 2600, profit: 1200 },
-  { name: 'Mar', income: 5200, expenses: 3200, profit: 2000 },
-  { name: 'Apr', income: 4800, expenses: 2900, profit: 1900 },
-  { name: 'May', income: 6200, expenses: 3800, profit: 2400 },
-  { name: 'Jun', income: 7100, expenses: 4200, profit: 2900 },
-]
+// Database type aliases
+type Property = Database['public']['Tables']['properties']['Row']
+type Transaction = Database['public']['Tables']['transactions']['Row']
+type Booking = Database['public']['Tables']['bookings']['Row']
 
-const propertyData = [
-  {
-    name: 'Downtown Loft',
-    value: 2800,
-    color: '#3b82f6',
-    revenue: 2800,
-    expenses: 1900,
-    profit: 900,
-    rating: 4.9,
-    reviews: 32,
-    occupancy: 85,
-    details: {
-      income: { bookings: 2500, cleaning_fees: 300 },
-      expenses: {
-        mortgage: 800,
-        cleaning: 200,
-        utilities: 150,
-        maintenance: 100,
-        insurance: 75,
-        marketing: 50,
-        other: 525,
-      },
-    },
-  },
-  {
-    name: 'Beach House',
-    value: 3200,
-    color: '#10b981',
-    revenue: 3200,
-    expenses: 2100,
-    profit: 1100,
-    rating: 4.8,
-    reviews: 28,
-    occupancy: 92,
-    details: {
-      income: { bookings: 2900, cleaning_fees: 300 },
-      expenses: {
-        mortgage: 1000,
-        cleaning: 250,
-        utilities: 200,
-        maintenance: 150,
-        insurance: 100,
-        marketing: 75,
-        other: 325,
-      },
-    },
-  },
-  {
-    name: 'Mountain Cabin',
-    value: 1800,
-    color: '#f59e0b',
-    revenue: 1800,
-    expenses: 1950,
-    profit: -150,
-    rating: 4.7,
-    reviews: 19,
-    occupancy: 78,
-    details: {
-      income: { bookings: 1600, cleaning_fees: 200 },
-      expenses: {
-        mortgage: 900,
-        cleaning: 180,
-        utilities: 120,
-        maintenance: 200,
-        insurance: 80,
-        marketing: 40,
-        other: 430,
-      },
-    },
-  },
-  {
-    name: 'City Apartment',
-    value: 2200,
-    color: '#ef4444',
-    revenue: 2200,
-    expenses: 1800,
-    profit: 400,
-    rating: 4.6,
-    reviews: 24,
-    occupancy: 88,
-    details: {
-      income: { bookings: 2000, cleaning_fees: 200 },
-      expenses: {
-        mortgage: 700,
-        cleaning: 160,
-        utilities: 130,
-        maintenance: 120,
-        insurance: 90,
-        marketing: 60,
-        other: 540,
-      },
-    },
-  },
-]
+// Dashboard data types
+interface DashboardProperty {
+  name: string
+  value: number
+  color: string
+  revenue: number
+  expenses: number
+  profit: number
+  rating: number
+  reviews: number
+  occupancy: number
+  details: {
+    income: { bookings: number; cleaning_fees: number }
+    expenses: {
+      mortgage: number
+      cleaning: number
+      utilities: number
+      maintenance: number
+      insurance: number
+      marketing: number
+      other: number
+      airbnb_service_fee: number
+    }
+  }
+  [key: string]: any // For chart compatibility
+}
 
-const expenseCategories = [
-  { name: 'Mortgage', value: 1200, color: '#dc2626' },
-  { name: 'Cleaning', value: 800, color: '#8b5cf6' },
-  { name: 'Maintenance', value: 600, color: '#06b6d4' },
-  { name: 'Utilities', value: 400, color: '#84cc16' },
-  { name: 'Insurance', value: 300, color: '#f97316' },
-  { name: 'Marketing', value: 200, color: '#ec4899' },
-]
+interface MonthlyData {
+  name: string
+  income: number
+  expenses: number
+  profit: number
+}
 
-const recentBookings = [
-  {
-    id: 1,
-    property: 'Downtown Loft',
-    guest: 'Sarah Johnson',
-    dates: 'Dec 15-18',
-    amount: 480,
-    status: 'confirmed',
-  },
-  {
-    id: 2,
-    property: 'Beach House',
-    guest: 'Mike Chen',
-    dates: 'Dec 20-25',
-    amount: 750,
-    status: 'confirmed',
-  },
-  {
-    id: 3,
-    property: 'Mountain Cabin',
-    guest: 'Emily Davis',
-    dates: 'Dec 22-26',
-    amount: 520,
-    status: 'pending',
-  },
-  {
-    id: 4,
-    property: 'City Apartment',
-    guest: 'John Smith',
-    dates: 'Dec 28-31',
-    amount: 420,
-    status: 'confirmed',
-  },
-]
+interface ExpenseCategory {
+  name: string
+  value: number
+  color: string
+  [key: string]: any // For chart compatibility
+}
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -195,8 +93,9 @@ export default function DashboardPage() {
 
   // State for dashboard data
   const [dashboardData, setDashboardData] = useState<{
-    properties: any[]
-    transactions: any[]
+    properties: Property[]
+    transactions: Transaction[]
+    bookings: Booking[]
     totalRevenue: number
     totalExpenses: number
     netProfit: number
@@ -204,14 +103,15 @@ export default function DashboardPage() {
     avgRating: number
     totalReviews: number
     avgOccupancy: number
-    monthlyData: any[]
-    propertyData: any[]
-    expenseCategories: any[]
+    monthlyData: MonthlyData[]
+    propertyData: DashboardProperty[]
+    expenseCategories: ExpenseCategory[]
     loading: boolean
     error: string | null
   }>({
     properties: [],
     transactions: [],
+    bookings: [],
     totalRevenue: 0,
     totalExpenses: 0,
     netProfit: 0,
@@ -237,17 +137,20 @@ export default function DashboardPage() {
     }
 
     try {
-      // Fetch properties and transactions
-      const [propertiesResult, transactionsResult] = await Promise.all([
+      // Fetch properties, transactions, and bookings
+      const [propertiesResult, transactionsResult, bookingsResult] = await Promise.all([
         db.properties.getAll(user.id),
         db.transactions.getAll(user.id),
+        db.bookings.getAll(user.id),
       ])
 
       if (propertiesResult.error) throw propertiesResult.error
       if (transactionsResult.error) throw transactionsResult.error
+      if (bookingsResult.error) throw bookingsResult.error
 
-      const properties = propertiesResult.data || []
-      const transactions = transactionsResult.data || []
+      const properties: Property[] = propertiesResult.data || []
+      const transactions: Transaction[] = transactionsResult.data || []
+      const bookings: Booking[] = bookingsResult.data || []
 
       // Calculate metrics
       const totalRevenue = transactions
@@ -278,9 +181,9 @@ export default function DashboardPage() {
           revenue,
           expenses,
           profit: revenue - expenses,
-          rating: 4.5 + Math.random() * 0.5, // Mock rating
-          reviews: Math.floor(Math.random() * 50) + 10, // Mock reviews
-          occupancy: Math.floor(Math.random() * 30) + 70, // Mock occupancy
+          rating: 4.5, // Default rating - could be calculated from reviews
+          reviews: 0, // Default reviews - could be fetched from booking platform
+          occupancy: 85, // Default occupancy - could be calculated from bookings
           details: {
             income: { bookings: revenue * 0.9, cleaning_fees: revenue * 0.1 },
             expenses: {
@@ -342,6 +245,7 @@ export default function DashboardPage() {
       setDashboardData({
         properties,
         transactions,
+        bookings,
         totalRevenue,
         totalExpenses,
         netProfit,
@@ -384,7 +288,7 @@ export default function DashboardPage() {
   }
 
   // Calculate Airbnb service fees for each property based on current fee model
-  const propertyDataWithFees = propertyData.map(property => {
+  const propertyDataWithFees = dashboardData.propertyData.map(property => {
     const airbnbServiceFee = calculateAirbnbServiceFee(
       property.details.income.bookings,
       property.details.income.cleaning_fees,
@@ -417,7 +321,7 @@ export default function DashboardPage() {
   )
 
   const expenseCategoriesWithFees = [
-    ...expenseCategories,
+    ...dashboardData.expenseCategories,
     { name: 'Airbnb Service Fees', value: Math.round(totalAirbnbServiceFees), color: '#f59e0b' },
   ]
 
@@ -698,7 +602,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={dashboardData.expenseCategories}
+                  data={expenseCategoriesWithFees}
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
@@ -706,7 +610,7 @@ export default function DashboardPage() {
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${formatCurrency(value as number)}`}
                 >
-                  {dashboardData.expenseCategories.map((entry, index) => (
+                  {expenseCategoriesWithFees.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -856,24 +760,40 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentBookings.map(booking => (
-                <div
-                  key={booking.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div className="flex-1">
-                    <div className="font-medium">{booking.property}</div>
-                    <div className="text-muted-foreground text-sm">{booking.guest}</div>
-                    <div className="text-muted-foreground text-xs">{booking.dates}</div>
+              {dashboardData.bookings.slice(0, 4).map(booking => {
+                const property = dashboardData.properties.find(p => p.id === booking.property_id)
+                const checkInDate = new Date(booking.check_in_date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })
+                const checkOutDate = new Date(booking.check_out_date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })
+
+                return (
+                  <div
+                    key={booking.id}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium">{property?.name || 'Unknown Property'}</div>
+                      <div className="text-muted-foreground text-sm">{booking.guest_name}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {checkInDate} - {checkOutDate}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">
+                        {formatCurrencyWithSettings(booking.total_amount)}
+                      </div>
+                      <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}>
+                        {booking.status}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-medium">{formatCurrency(booking.amount)}</div>
-                    <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}>
-                      {booking.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </CardContent>
         </Card>
