@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/contexts/auth-context'
 import { useSettings } from '@/contexts/settings-context'
+import { db } from '@/lib/supabase'
 import { calculateAirbnbServiceFee, formatCurrency } from '@/lib/utils'
 import {
   Building2,
@@ -20,7 +21,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Bar,
   BarChart,
@@ -229,7 +230,7 @@ export default function DashboardPage() {
   const formatCurrencyWithSettings = (amount: number) => formatCurrency(amount, currency)
 
   // Fetch dashboard data from database
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     if (!user?.id) {
       setDashboardData(prev => ({ ...prev, loading: false, error: 'No user found' }))
       return
@@ -365,12 +366,12 @@ export default function DashboardPage() {
         error: 'Failed to load dashboard data',
       }))
     }
-  }
+  }, [user?.id])
 
   // Fetch data on component mount and when user changes
   useEffect(() => {
     fetchDashboardData()
-  }, [user?.id])
+  }, [fetchDashboardData])
 
   const togglePropertyExpansion = (propertyName: string) => {
     const newExpanded = new Set(expandedProperties)
