@@ -541,14 +541,7 @@ export class ReportGenerator {
       )
     }
 
-    // Debug logging to understand data flow
-    console.log('=== REPORT GENERATION DEBUG ===')
-    console.log('Original mock transactions:', mockTransactions.length)
-    console.log('Date range:', reportData.dateRange)
-    console.log('Selected properties:', reportData.properties)
-    console.log('Filtered transactions:', transactions.length)
-    console.log('Filtered properties:', properties.length)
-    console.log('Sample transactions:', transactions.slice(0, 3))
+    // Ensure we have data to work with
 
     // Ensure we have some data to work with
     if (transactions.length === 0) {
@@ -600,23 +593,8 @@ export class ReportGenerator {
   }
 
   private calculateSummary(transactions: TransactionData[], properties: PropertyData[]) {
-    console.log('=== CALCULATE SUMMARY DEBUG ===')
-    console.log('Transactions received:', transactions.length)
-    console.log('Properties received:', properties.length)
-
     const incomeTransactions = transactions.filter(t => t.type === 'income')
     const expenseTransactions = transactions.filter(t => t.type === 'expense')
-
-    console.log(
-      'Income transactions:',
-      incomeTransactions.length,
-      incomeTransactions.map(t => t.amount)
-    )
-    console.log(
-      'Expense transactions:',
-      expenseTransactions.length,
-      expenseTransactions.map(t => t.amount)
-    )
 
     const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0)
     const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0)
@@ -629,7 +607,7 @@ export class ReportGenerator {
         ? properties.reduce((sum, p) => sum + p.occupancy_rate, 0) / properties.length
         : 0
 
-    const summary = {
+    return {
       totalIncome,
       totalExpenses,
       netProfit,
@@ -638,9 +616,6 @@ export class ReportGenerator {
       avgOccupancyRate,
       profitMargin: totalIncome > 0 ? (netProfit / totalIncome) * 100 : 0,
     }
-
-    console.log('Calculated summary:', summary)
-    return summary
   }
 
   private calculateComparisons(
@@ -1215,11 +1190,6 @@ export class ReportGenerator {
   }
 
   private addFinancialCharts(doc: any, context: any, yPosition: number): number {
-    console.log('=== CHART DATA DEBUG ===')
-    console.log('Context summary:', context.summary)
-    console.log('Total Income for chart:', context.summary.totalIncome)
-    console.log('Total Expenses for chart:', context.summary.totalExpenses)
-
     // Income vs Expenses Bar Chart
     yPosition = this.drawBarChart(doc, {
       title: 'Income vs Expenses',
