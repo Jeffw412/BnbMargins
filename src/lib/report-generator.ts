@@ -1,3 +1,4 @@
+import { Database } from '@/types/database'
 import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import * as XLSX from 'xlsx'
@@ -113,8 +114,16 @@ export class ReportGenerator {
       throw transactionsError
     }
 
+    // Type the database results properly
+    const typedProperties = dbProperties as
+      | Database['public']['Tables']['properties']['Row'][]
+      | null
+    const typedTransactions = dbTransactions as
+      | Database['public']['Tables']['transactions']['Row'][]
+      | null
+
     // Transform database data to match our interfaces
-    const properties: PropertyData[] = (dbProperties || []).map(prop => ({
+    const properties: PropertyData[] = (typedProperties || []).map(prop => ({
       id: prop.id,
       name: prop.name,
       monthly_revenue: 0, // Will be calculated from transactions
@@ -125,8 +134,8 @@ export class ReportGenerator {
     }))
 
     // Transform transactions and calculate property metrics
-    const transactions: TransactionData[] = (dbTransactions || []).map(trans => {
-      const property = dbProperties?.find(p => p.id === trans.property_id)
+    const transactions: TransactionData[] = (typedTransactions || []).map(trans => {
+      const property = typedProperties?.find(p => p.id === trans.property_id)
       return {
         id: trans.id,
         property_name: property?.name || 'Unknown Property',
@@ -1517,8 +1526,8 @@ export class ReportGenerator {
           p.monthly_revenue,
           p.monthly_expenses,
           netProfit,
-          profitMargin.toFixed(2),
-          p.occupancy_rate,
+          profitMargin / 100, // Convert to decimal for Excel percentage formatting
+          p.occupancy_rate / 100, // Convert to decimal for Excel percentage formatting
           p.avg_rating,
           p.total_reviews,
           performanceScore.toFixed(1),
@@ -1601,7 +1610,7 @@ export class ReportGenerator {
         m.revenue,
         m.expenses,
         m.profit,
-        m.occupancy_rate,
+        m.occupancy_rate / 100, // Convert to decimal for Excel percentage formatting
         m.bookings,
       ]),
     ]
@@ -1728,26 +1737,108 @@ export class ReportGenerator {
       columnWidths?: number[]
     }
   ): void {
-    // Note: XLSX.js has limited formatting capabilities in the free version
-    // This is a simplified formatting approach
-
+    // Set column widths
     if (options.columnWidths) {
       const cols = options.columnWidths.map(width => ({ wch: width }))
       sheet['!cols'] = cols
     }
 
-    // Set column types for better Excel display
+    // Get the range of the sheet
+    const range = XLSX.utils.decode_range(sheet['!ref'] || 'A1:A1')
+
+    // Format header row
+    if (options.headerRow !== undefined) {
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: options.headerRow, c: col })
+        if (sheet[cellAddress]) {
+          sheet[cellAddress].s = {
+            font: { bold: true, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '2563EB' } },
+            alignment: { horizontal: 'center', vertical: 'center' },
+            border: {
+              top: { style: 'thin', color: { rgb: '000000' } },
+              bottom: { style: 'thin', color: { rgb: '000000' } },
+              left: { style: 'thin', color: { rgb: '000000' } },
+              right: { style: 'thin', color: { rgb: '000000' } },
+            },
+          }
+        }
+      }
+    }
+
+    // Format currency columns
     if (options.currencyColumns) {
-      // In a full implementation, you would set number formats here
-      // This requires the paid version of SheetJS or a different library
+      options.currencyColumns.forEach(colIndex => {
+        for (let row = (options.headerRow || 0) + 1; row <= range.e.r; row++) {
+          const cellAddress = XLSX.utils.encode_cell({ r: row, c: colIndex })
+          if (sheet[cellAddress] && typeof sheet[cellAddress].v === 'number') {
+            sheet[cellAddress].z = '"$"#,##0.00'
+            sheet[cellAddress].s = {
+              alignment: { horizontal: 'right' },
+              border: {
+                top: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                left: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                right: { style: 'thin', color: { rgb: 'E5E7EB' } },
+              },
+            }
+          }
+        }
+      })
+    }
+
+    // Format percentage columns
+    if (options.percentColumns) {
+      options.percentColumns.forEach(colIndex => {
+        for (let row = (options.headerRow || 0) + 1; row <= range.e.r; row++) {
+          const cellAddress = XLSX.utils.encode_cell({ r: row, c: colIndex })
+          if (sheet[cellAddress] && typeof sheet[cellAddress].v === 'number') {
+            sheet[cellAddress].z = '0.00%'
+            sheet[cellAddress].s = {
+              alignment: { horizontal: 'center' },
+              border: {
+                top: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                left: { style: 'thin', color: { rgb: 'E5E7EB' } },
+                right: { style: 'thin', color: { rgb: 'E5E7EB' } },
+              },
+            }
+          }
+        }
+      })
+    }
+
+    // Add borders to all data cells
+    for (let row = (options.headerRow || 0) + 1; row <= range.e.r; row++) {
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = XLSX.utils.encode_cell({ r: row, c: col })
+        if (sheet[cellAddress] && !sheet[cellAddress].s) {
+          sheet[cellAddress].s = {
+            border: {
+              top: { style: 'thin', color: { rgb: 'E5E7EB' } },
+              bottom: { style: 'thin', color: { rgb: 'E5E7EB' } },
+              left: { style: 'thin', color: { rgb: 'E5E7EB' } },
+              right: { style: 'thin', color: { rgb: 'E5E7EB' } },
+            },
+          }
+        }
+      }
     }
   }
 
   private async generateCSV(reportData: ReportData, context: any): Promise<void> {
     let csvContent = ''
 
-    // Add title and metadata
-    csvContent += `${reportData.title}\n`
+    // Add title and metadata with proper formatting
+    csvContent += `"${reportData.title}"\n`
+    csvContent += `"Generated on: ${new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })}"\n`
+
     if (reportData.dateRange.from || reportData.dateRange.to) {
       const fromDate = reportData.dateRange.from
         ? this.formatDate(reportData.dateRange.from.toISOString())
@@ -1755,28 +1846,73 @@ export class ReportGenerator {
       const toDate = reportData.dateRange.to
         ? this.formatDate(reportData.dateRange.to.toISOString())
         : 'End'
-      csvContent += `Period: ${fromDate} - ${toDate}\n`
+      csvContent += `"Report Period: ${fromDate} - ${toDate}"\n`
     }
     csvContent += '\n'
 
-    // Add transactions data
-    if (reportData.includeTransactions && context.transactions.length > 0) {
-      csvContent += 'TRANSACTIONS\n'
-      csvContent += 'Date,Property,Type,Category,Amount,Description\n'
-      context.transactions.forEach((t: TransactionData) => {
-        csvContent += `${t.date},${t.property_name},${t.type},${t.category},${t.amount},"${t.description}"\n`
+    // Add executive summary
+    csvContent += '"EXECUTIVE SUMMARY"\n'
+    csvContent += '"Metric","Value"\n'
+    csvContent += `"Total Income","${this.formatCurrency(context.summary.totalIncome)}"\n`
+    csvContent += `"Total Expenses","${this.formatCurrency(context.summary.totalExpenses)}"\n`
+    csvContent += `"Net Profit","${this.formatCurrency(context.summary.netProfit)}"\n`
+    csvContent += `"Profit Margin","${context.summary.profitMargin.toFixed(2)}%"\n`
+    csvContent += '\n'
+
+    // Add properties data with better formatting
+    if (context.properties.length > 0) {
+      csvContent += '"PROPERTY PERFORMANCE"\n'
+      csvContent +=
+        '"Property Name","Monthly Revenue","Monthly Expenses","Net Profit","Profit Margin","Occupancy Rate","Avg Rating","Total Reviews","Performance Score"\n'
+
+      context.properties.forEach((p: PropertyData) => {
+        const netProfit = p.monthly_revenue - p.monthly_expenses
+        const profitMargin = p.monthly_revenue > 0 ? (netProfit / p.monthly_revenue) * 100 : 0
+        const performanceScore =
+          p.occupancy_rate * 0.4 + p.avg_rating * 20 * 0.3 + profitMargin * 0.3
+
+        csvContent += `"${p.name}","${this.formatCurrency(p.monthly_revenue)}","${this.formatCurrency(p.monthly_expenses)}","${this.formatCurrency(netProfit)}","${profitMargin.toFixed(2)}%","${p.occupancy_rate.toFixed(1)}%","${p.avg_rating.toFixed(1)}","${p.total_reviews}","${performanceScore.toFixed(1)}"\n`
       })
       csvContent += '\n'
     }
 
-    // Add properties data
-    if (context.properties.length > 0) {
-      csvContent += 'PROPERTIES\n'
-      csvContent +=
-        'Property Name,Monthly Revenue,Monthly Expenses,Net Profit,Occupancy Rate,Avg Rating,Reviews\n'
-      context.properties.forEach((p: PropertyData) => {
-        csvContent += `${p.name},${p.monthly_revenue},${p.monthly_expenses},${p.monthly_revenue - p.monthly_expenses},${p.occupancy_rate},${p.avg_rating},${p.total_reviews}\n`
+    // Add monthly performance data
+    if (context.monthlyPerformance.length > 0) {
+      csvContent += '"MONTHLY PERFORMANCE"\n'
+      csvContent += '"Month","Property","Revenue","Expenses","Profit","Occupancy Rate","Bookings"\n'
+
+      context.monthlyPerformance.forEach((m: MonthlyPerformanceData) => {
+        csvContent += `"${m.month}","${m.property_name}","${this.formatCurrency(m.revenue)}","${this.formatCurrency(m.expenses)}","${this.formatCurrency(m.profit)}","${m.occupancy_rate.toFixed(1)}%","${m.bookings}"\n`
       })
+      csvContent += '\n'
+    }
+
+    // Add transactions data with better formatting
+    if (reportData.includeTransactions && context.transactions.length > 0) {
+      csvContent += '"TRANSACTION DETAILS"\n'
+      csvContent += '"Date","Property","Type","Category","Amount","Description"\n'
+
+      context.transactions.forEach((t: TransactionData) => {
+        const formattedDate = this.formatDate(t.date)
+        const formattedAmount = this.formatCurrency(t.amount)
+        const cleanDescription = t.description.replace(/"/g, '""') // Escape quotes in description
+
+        csvContent += `"${formattedDate}","${t.property_name}","${t.type}","${t.category}","${formattedAmount}","${cleanDescription}"\n`
+      })
+      csvContent += '\n'
+    }
+
+    // Add comparisons if available
+    if (reportData.includeComparisons && context.comparisons) {
+      csvContent += '"PERIOD COMPARISON"\n'
+      csvContent +=
+        '"Metric","Current Period","Previous Period","Change Amount","Change Percentage"\n'
+
+      const comp = context.comparisons
+      csvContent += `"Revenue","${this.formatCurrency(comp.current_period.revenue)}","${this.formatCurrency(comp.previous_period.revenue)}","${this.formatCurrency(comp.current_period.revenue - comp.previous_period.revenue)}","${comp.change_percentage.revenue.toFixed(2)}%"\n`
+      csvContent += `"Expenses","${this.formatCurrency(comp.current_period.expenses)}","${this.formatCurrency(comp.previous_period.expenses)}","${this.formatCurrency(comp.current_period.expenses - comp.previous_period.expenses)}","${comp.change_percentage.expenses.toFixed(2)}%"\n`
+      csvContent += `"Profit","${this.formatCurrency(comp.current_period.profit)}","${this.formatCurrency(comp.previous_period.profit)}","${this.formatCurrency(comp.current_period.profit - comp.previous_period.profit)}","${comp.change_percentage.profit.toFixed(2)}%"\n`
+      csvContent += `"Occupancy","${comp.current_period.occupancy.toFixed(1)}%","${comp.previous_period.occupancy.toFixed(1)}%","${(comp.current_period.occupancy - comp.previous_period.occupancy).toFixed(1)}%","${comp.change_percentage.occupancy.toFixed(2)}%"\n`
     }
 
     // Save the CSV file
