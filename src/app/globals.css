@@ -389,3 +389,47 @@ body {
   justify-content: space-between !important;
   width: 100% !important;
 }
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Ensure proper touch targets */
+  button,
+  [role='button'] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve dialog spacing on mobile */
+  [role='dialog'] {
+    margin: 1rem;
+  }
+
+  /* Better mobile form spacing */
+  .space-y-4 > * + * {
+    margin-top: 1.5rem;
+  }
+
+  /* Improve mobile card spacing */
+  .space-y-6 > * + * {
+    margin-top: 1rem;
+  }
+}
+
+/* Improve mobile viewport handling */
+@media (max-width: 640px) {
+  /* Reduce padding on small screens */
+  .p-6 {
+    padding: 1rem !important;
+  }
+
+  /* Better mobile header spacing */
+  .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Improve mobile text sizing */
+  .text-3xl {
+    font-size: 1.875rem !important;
+  }
+}

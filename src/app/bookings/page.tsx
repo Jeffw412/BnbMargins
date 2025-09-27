@@ -210,7 +210,7 @@ export default function BookingsPage() {
     return Math.ceil(timeDiff / (1000 * 3600 * 24))
   }
 
-  const calculateDefaultRate = (propertyId: string, checkIn: Date, checkOut: Date): number => {
+  const calculateDefaultRate = (propertyId: string, _checkIn: Date, _checkOut: Date): number => {
     const property = properties.find(p => p.id === propertyId)
     if (!property) return 150 // Default rate if property not found
 
@@ -442,8 +442,16 @@ export default function BookingsPage() {
         </Button>
       </div>
 
-      {/* Bookings List */}
-      {bookings.length === 0 ? (
+      {/* Loading State */}
+      {loading ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="border-primary mb-4 h-8 w-8 animate-spin rounded-full border-b-2"></div>
+            <p className="text-muted-foreground">Loading bookings...</p>
+          </CardContent>
+        </Card>
+      ) : /* Bookings List */
+      bookings.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <CalendarDays className="text-muted-foreground mb-4 h-12 w-12" />
@@ -471,9 +479,10 @@ export default function BookingsPage() {
                     </div>
                     <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 sm:space-x-2">
                     <Button variant="outline" size="sm" onClick={() => handleEditBooking(booking)}>
                       <Edit className="h-4 w-4" />
+                      <span className="sr-only sm:not-sr-only sm:ml-2">Edit</span>
                     </Button>
                     {booking.status === 'confirmed' && (
                       <Button
@@ -482,6 +491,7 @@ export default function BookingsPage() {
                         onClick={() => handleCancelBooking(booking.id)}
                       >
                         <X className="h-4 w-4" />
+                        <span className="sr-only sm:not-sr-only sm:ml-2">Cancel</span>
                       </Button>
                     )}
                     <Button
@@ -490,12 +500,13 @@ export default function BookingsPage() {
                       onClick={() => handleDeleteBooking(booking.id)}
                     >
                       <Trash2 className="h-4 w-4" />
+                      <span className="sr-only sm:not-sr-only sm:ml-2">Delete</span>
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-2">
                     <div className="flex items-center text-sm">
                       <Calendar className="text-muted-foreground mr-2 h-4 w-4" />
@@ -530,7 +541,7 @@ export default function BookingsPage() {
                     )}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 sm:col-span-2 lg:col-span-1">
                     {booking.guest_email && (
                       <div className="text-muted-foreground text-sm">{booking.guest_email}</div>
                     )}
@@ -553,7 +564,7 @@ export default function BookingsPage() {
 
       {/* Add/Edit Booking Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogContent className="max-h-[90vh] w-[95vw] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingBooking ? 'Edit Booking' : 'Add New Booking'}</DialogTitle>
             <DialogDescription>
@@ -795,7 +806,7 @@ export default function BookingsPage() {
 
       {/* Cancellation Dialog */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-[95vw] max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Cancel Booking</DialogTitle>
             <DialogDescription>

@@ -175,6 +175,7 @@ export default function DashboardPage() {
           .reduce((sum, t) => sum + t.amount, 0)
 
         propertyDataMap.set(property.id, {
+          id: property.id, // Add unique ID for React keys
           name: property.name,
           value: revenue,
           color: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'][properties.indexOf(property) % 4],
@@ -375,7 +376,7 @@ export default function DashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Button
               variant="outline"
               className="flex h-16 flex-col space-y-1"
@@ -806,7 +807,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {dashboardData.propertyData.map(property => (
-                <div key={property.name} className="rounded-lg border">
+                <div key={property.id} className="rounded-lg border">
                   <div
                     className="hover:bg-muted/50 flex cursor-pointer items-center justify-between p-3"
                     onClick={() => togglePropertyExpansion(property.name)}
@@ -935,7 +936,7 @@ export default function DashboardPage() {
           <CardDescription>Common tasks and shortcuts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Button
               variant="outline"
               className="h-20 flex-col"
