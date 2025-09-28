@@ -1,0 +1,211 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - link "BnbMargins" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7] [cursor=pointer]
+        - generic [ref=e15] [cursor=pointer]: BnbMargins
+      - navigation [ref=e16]:
+        - link "Home" [ref=e17] [cursor=pointer]:
+          - /url: /
+          - img [ref=e18] [cursor=pointer]
+          - generic [ref=e21] [cursor=pointer]: Home
+        - link "Dashboard" [ref=e22] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e23] [cursor=pointer]
+          - generic [ref=e28] [cursor=pointer]: Dashboard
+        - link "Properties" [ref=e29] [cursor=pointer]:
+          - /url: /properties
+          - img [ref=e30] [cursor=pointer]
+          - generic [ref=e38] [cursor=pointer]: Properties
+        - link "Bookings" [ref=e39] [cursor=pointer]:
+          - /url: /bookings
+          - img [ref=e40] [cursor=pointer]
+          - generic [ref=e45] [cursor=pointer]: Bookings
+        - link "Transactions" [ref=e46] [cursor=pointer]:
+          - /url: /transactions
+          - img [ref=e47] [cursor=pointer]
+          - generic [ref=e51] [cursor=pointer]: Transactions
+        - link "Reports" [ref=e52] [cursor=pointer]:
+          - /url: /reports
+          - img [ref=e53] [cursor=pointer]
+          - generic [ref=e59] [cursor=pointer]: Reports
+        - link "Analytics" [ref=e60] [cursor=pointer]:
+          - /url: /analytics
+          - img [ref=e61] [cursor=pointer]
+          - generic [ref=e66] [cursor=pointer]: Analytics
+        - link "Settings" [ref=e67] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e68] [cursor=pointer]
+          - generic [ref=e71] [cursor=pointer]: Settings
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - img [ref=e75]
+          - generic [ref=e78]:
+            - paragraph [ref=e79]: User
+            - paragraph
+        - button "Sign Out" [ref=e80]:
+          - img [ref=e81]
+          - text: Sign Out
+    - generic [ref=e85]:
+      - banner [ref=e86]:
+        - generic [ref=e88]:
+          - img [ref=e89]
+          - searchbox "Search properties, transactions..." [ref=e92]
+        - generic [ref=e93]:
+          - generic [ref=e94]: All Systems Operational
+          - button "Toggle theme" [ref=e95]:
+            - img [ref=e96]
+            - generic [ref=e106]: Toggle theme
+          - button [ref=e107]:
+            - img [ref=e108]
+          - button [ref=e112]:
+            - img [ref=e113]
+      - main [ref=e116]:
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - generic [ref=e119]:
+              - heading "Analytics" [level=1] [ref=e120]
+              - paragraph [ref=e121]: Advanced analytics and insights for your properties
+            - generic [ref=e122]:
+              - button "Refresh" [ref=e123]:
+                - img [ref=e124]
+                - text: Refresh
+              - button "Export Report" [ref=e129]:
+                - img [ref=e130]
+                - text: Export Report
+          - generic [ref=e134]:
+            - heading "Filters & Comparisons" [level=3] [ref=e136]:
+              - img [ref=e137]
+              - generic [ref=e139]: Filters & Comparisons
+            - generic [ref=e141]:
+              - generic [ref=e142]:
+                - generic [ref=e143]: Properties
+                - combobox [ref=e144]:
+                  - generic: Downtown + Beachside
+                  - img [ref=e145]
+              - generic [ref=e147]:
+                - generic [ref=e148]: Primary Period
+                - button "Select date range" [ref=e149]:
+                  - img [ref=e150]
+                  - generic [ref=e155]: Select date range
+              - generic [ref=e156]:
+                - generic [ref=e157]: Comparison Period
+                - button "Compare with period" [ref=e158]:
+                  - img [ref=e159]
+                  - generic [ref=e164]: Compare with period
+              - generic [ref=e165]:
+                - generic [ref=e166]: View Type
+                - combobox [ref=e167]:
+                  - generic: Monthly
+                  - img [ref=e168]
+          - generic [ref=e170]:
+            - generic [ref=e171]:
+              - generic [ref=e172]:
+                - heading "Total Revenue" [level=3] [ref=e173]
+                - img [ref=e174]
+              - generic [ref=e177]:
+                - generic [ref=e178]: $59,800.00
+                - paragraph [ref=e179]: +12.5% from last period
+            - generic [ref=e180]:
+              - generic [ref=e181]:
+                - heading "Total Expenses" [level=3] [ref=e182]
+                - img [ref=e183]
+              - generic [ref=e186]:
+                - generic [ref=e187]: $39,250.00
+                - paragraph [ref=e188]: +8.2% from last period
+            - generic [ref=e189]:
+              - generic [ref=e190]:
+                - heading "Net Profit" [level=3] [ref=e191]
+                - img [ref=e192]
+              - generic [ref=e195]:
+                - generic [ref=e196]: $20,550.00
+                - paragraph [ref=e197]: +18.7% from last period
+            - generic [ref=e198]:
+              - generic [ref=e199]:
+                - heading "Avg Occupancy" [level=3] [ref=e200]
+                - img [ref=e201]
+              - generic [ref=e209]:
+                - generic [ref=e210]: 78.3%
+                - paragraph [ref=e211]: +3.2% from last period
+            - generic [ref=e212]:
+              - generic [ref=e213]:
+                - heading "Avg Rating" [level=3] [ref=e214]
+                - img [ref=e215]
+              - generic [ref=e218]:
+                - generic [ref=e219]: "4.8"
+                - paragraph [ref=e220]: +0.1 from last period
+          - generic [ref=e221]:
+            - tablist [ref=e222]:
+              - tab "Overview" [ref=e223]
+              - tab "Property Comparison" [ref=e224]
+              - tab "Trends & Patterns" [ref=e225]
+              - tab "Category Breakdown" [ref=e226]
+              - tab "ADR & RevPAR" [ref=e227]
+              - tab "Length of Stay" [ref=e228]
+              - tab "Utilization" [ref=e229]
+              - tab "ROI Analysis" [active] [selected] [ref=e230]
+              - tab "Forecasting" [ref=e231]
+            - tabpanel "ROI Analysis" [ref=e232]:
+              - generic [ref=e233]:
+                - generic [ref=e234]:
+                  - heading "ROI & Profitability Analysis" [level=3] [ref=e235]:
+                    - img [ref=e236]
+                    - generic [ref=e239]: ROI & Profitability Analysis
+                  - paragraph [ref=e240]: Return on investment and financial performance metrics
+                - generic [ref=e242]:
+                  - application [ref=e245]:
+                    - generic [ref=e260]:
+                      - generic [ref=e264]: 0.0%
+                      - generic [ref=e268]: 0.3%
+                      - generic [ref=e272]: 0.5%
+                      - generic [ref=e276]: 0.8%
+                      - generic [ref=e280]: 1.0%
+                    - generic [ref=e283]:
+                      - generic [ref=e287]: Downtown Loft
+                      - generic [ref=e291]: Beachside Villa
+                  - generic [ref=e292]:
+                    - heading "Investment Performance" [level=3] [ref=e293]
+                    - generic [ref=e294]:
+                      - generic [ref=e295]:
+                        - heading "Downtown Loft" [level=4] [ref=e296]
+                        - generic [ref=e297]: "ROI: 1.43x"
+                      - generic [ref=e298]:
+                        - generic [ref=e299]:
+                          - generic [ref=e300]: "Purchase Price:"
+                          - generic [ref=e301]: $450,000.00
+                        - generic [ref=e302]:
+                          - generic [ref=e303]: "Net Profit:"
+                          - generic [ref=e304]: $6,450.00
+                        - generic [ref=e305]:
+                          - generic [ref=e306]: "Cash-on-Cash:"
+                          - generic [ref=e307]: 8.2%
+                        - generic [ref=e308]:
+                          - generic [ref=e309]: "Payback Period:"
+                          - generic [ref=e310]: 12.2 years
+                    - generic [ref=e311]:
+                      - generic [ref=e312]:
+                        - heading "Beachside Villa" [level=4] [ref=e313]
+                        - generic [ref=e314]: "ROI: 1.40x"
+                      - generic [ref=e315]:
+                        - generic [ref=e316]:
+                          - generic [ref=e317]: "Purchase Price:"
+                          - generic [ref=e318]: $680,000.00
+                        - generic [ref=e319]:
+                          - generic [ref=e320]: "Net Profit:"
+                          - generic [ref=e321]: $9,500.00
+                        - generic [ref=e322]:
+                          - generic [ref=e323]: "Cash-on-Cash:"
+                          - generic [ref=e324]: 7.8%
+                        - generic [ref=e325]:
+                          - generic [ref=e326]: "Payback Period:"
+                          - generic [ref=e327]: 12.8 years
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e333] [cursor=pointer]:
+    - img [ref=e334] [cursor=pointer]
+  - alert [ref=e338]
+  - generic [ref=e339]: Downtown Loft
+```

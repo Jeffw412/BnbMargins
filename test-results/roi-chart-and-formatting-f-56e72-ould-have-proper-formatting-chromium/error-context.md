@@ -1,0 +1,188 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - link:
+          - /url: /
+          - generic:
+            - img
+          - generic: BnbMargins
+      - navigation:
+        - link:
+          - /url: /
+          - img
+          - generic: Home
+        - link:
+          - /url: /dashboard
+          - img
+          - generic: Dashboard
+        - link:
+          - /url: /properties
+          - img
+          - generic: Properties
+        - link:
+          - /url: /bookings
+          - img
+          - generic: Bookings
+        - link:
+          - /url: /transactions
+          - img
+          - generic: Transactions
+        - link:
+          - /url: /reports
+          - img
+          - generic: Reports
+        - link:
+          - /url: /analytics
+          - img
+          - generic: Analytics
+        - link:
+          - /url: /settings
+          - img
+          - generic: Settings
+      - generic:
+        - generic:
+          - generic:
+            - img
+          - generic:
+            - paragraph: User
+        - button:
+          - img
+          - text: Sign Out
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - img
+            - searchbox
+        - generic:
+          - generic: All Systems Operational
+          - button:
+            - img
+            - generic: Toggle theme
+          - button:
+            - img
+          - button:
+            - img
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=1]: Reports
+              - paragraph: Generate and manage comprehensive financial reports
+            - generic:
+              - button:
+                - img
+                - text: Refresh
+              - button:
+                - img
+                - text: Generate Report
+          - generic:
+            - tablist:
+              - tab [selected]: Generate Reports
+              - tab: Scheduled Reports
+              - tab: Report History
+            - tabpanel:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                    - heading [level=3]: Financial Reports
+                  - generic:
+                    - button: Generate
+                - generic:
+                  - generic:
+                    - img
+                    - heading [level=3]: Performance Reports
+                  - generic:
+                    - button: Generate
+                - generic:
+                  - generic:
+                    - img
+                    - heading [level=3]: Tax Reports
+                  - generic:
+                    - button: Generate
+                - generic:
+                  - generic:
+                    - img
+                    - heading [level=3]: Custom Reports
+                  - generic:
+                    - button: Generate
+              - generic:
+                - generic:
+                  - heading [level=3]: Quick Reports
+                  - paragraph: Generate common reports instantly
+                - generic:
+                  - generic:
+                    - button:
+                      - img
+                      - generic: This Month P&L
+                    - button:
+                      - img
+                      - generic: YTD Performance
+                    - button:
+                      - img
+                      - generic: Tax Summary
+                    - button:
+                      - img
+                      - generic: Property Comparison
+                    - button:
+                      - img
+                      - generic: Occupancy Report
+                    - button:
+                      - img
+                      - generic: Expense Analysis
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e6] [cursor=pointer]:
+    - img [ref=e7] [cursor=pointer]
+  - alert
+  - dialog "Generate Report" [ref=e11]:
+    - generic [ref=e12]:
+      - heading "Generate Report" [level=2] [ref=e13]
+      - paragraph [ref=e14]: Configure and generate a custom report for your properties
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: Report Type
+          - combobox [active] [ref=e19]:
+            - generic: Financial Reports
+            - img [ref=e20]
+        - generic [ref=e22]:
+          - generic [ref=e23]: Format
+          - combobox [ref=e24]:
+            - generic: PDF
+            - img [ref=e25]
+      - generic [ref=e27]:
+        - generic [ref=e28]: Date Range
+        - button "Select date range for report" [ref=e29]:
+          - img [ref=e30]
+          - generic [ref=e32]: Select date range for report
+      - generic [ref=e33]:
+        - generic [ref=e34]: Properties
+        - combobox [ref=e35]:
+          - generic: All Properties
+          - img [ref=e36]
+      - generic [ref=e38]:
+        - generic [ref=e39]: Additional Options
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - switch "Include charts and visualizations" [checked] [ref=e42] [cursor=pointer]
+            - generic [ref=e43]: Include charts and visualizations
+          - generic [ref=e44]:
+            - switch "Include detailed transaction list" [ref=e45] [cursor=pointer]
+            - generic [ref=e46]: Include detailed transaction list
+          - generic [ref=e47]:
+            - switch "Include period comparisons" [ref=e48] [cursor=pointer]
+            - generic [ref=e49]: Include period comparisons
+    - generic [ref=e50]:
+      - button "Cancel" [ref=e51]
+      - button "Generate Report" [ref=e52]:
+        - img [ref=e53]
+        - text: Generate Report
+    - button "Close" [ref=e56]:
+      - img [ref=e57]
+      - generic [ref=e60]: Close
+```

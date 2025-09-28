@@ -1,0 +1,143 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - link "BnbMargins" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7] [cursor=pointer]
+        - generic [ref=e11] [cursor=pointer]: BnbMargins
+      - navigation [ref=e12]:
+        - link "Home" [ref=e13] [cursor=pointer]:
+          - /url: /
+          - img [ref=e14] [cursor=pointer]
+          - generic [ref=e17] [cursor=pointer]: Home
+        - link "Dashboard" [ref=e18] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e19] [cursor=pointer]
+          - generic [ref=e24] [cursor=pointer]: Dashboard
+        - link "Properties" [ref=e25] [cursor=pointer]:
+          - /url: /properties
+          - img [ref=e26] [cursor=pointer]
+          - generic [ref=e30] [cursor=pointer]: Properties
+        - link "Bookings" [ref=e31] [cursor=pointer]:
+          - /url: /bookings
+          - img [ref=e32] [cursor=pointer]
+          - generic [ref=e34] [cursor=pointer]: Bookings
+        - link "Transactions" [ref=e35] [cursor=pointer]:
+          - /url: /transactions
+          - img [ref=e36] [cursor=pointer]
+          - generic [ref=e39] [cursor=pointer]: Transactions
+        - link "Reports" [ref=e40] [cursor=pointer]:
+          - /url: /reports
+          - img [ref=e41] [cursor=pointer]
+          - generic [ref=e44] [cursor=pointer]: Reports
+        - link "Analytics" [ref=e45] [cursor=pointer]:
+          - /url: /analytics
+          - img [ref=e46] [cursor=pointer]
+          - generic [ref=e48] [cursor=pointer]: Analytics
+        - link "Settings" [ref=e49] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e50] [cursor=pointer]
+          - generic [ref=e53] [cursor=pointer]: Settings
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - img [ref=e57]
+          - generic [ref=e60]:
+            - paragraph [ref=e61]: User
+            - paragraph
+        - button "Sign Out" [ref=e62]:
+          - img [ref=e63]
+          - text: Sign Out
+    - generic [ref=e66]:
+      - banner [ref=e67]:
+        - generic [ref=e69]:
+          - img [ref=e70]
+          - searchbox "Search properties, transactions..." [ref=e73]
+        - generic [ref=e74]:
+          - generic [ref=e75]: All Systems Operational
+          - button "Toggle theme" [ref=e76]:
+            - img [ref=e77]
+            - generic [ref=e83]: Toggle theme
+          - button [ref=e84]:
+            - img [ref=e85]
+          - button [ref=e89]:
+            - img [ref=e90]
+      - main [ref=e93]:
+        - generic [ref=e94]:
+          - generic [ref=e95]:
+            - generic [ref=e96]:
+              - heading "Reports" [level=1] [ref=e97]
+              - paragraph [ref=e98]: Generate and manage comprehensive financial reports
+            - generic [ref=e99]:
+              - button "Refresh" [ref=e100]:
+                - img [ref=e101]
+                - text: Refresh
+              - button "Generate Report" [ref=e106]:
+                - img [ref=e107]
+                - text: Generate Report
+          - generic [ref=e108]:
+            - tablist [ref=e109]:
+              - tab "Generate Reports" [selected] [ref=e110]
+              - tab "Scheduled Reports" [ref=e111]
+              - tab "Report History" [ref=e112]
+            - tabpanel "Generate Reports" [ref=e113]:
+              - generic [ref=e114]:
+                - generic [ref=e115] [cursor=pointer]:
+                  - generic [ref=e116] [cursor=pointer]:
+                    - img [ref=e117] [cursor=pointer]
+                    - heading "Financial Reports" [level=3] [ref=e119] [cursor=pointer]
+                  - button "Generate" [ref=e121]
+                - generic [ref=e122] [cursor=pointer]:
+                  - generic [ref=e123] [cursor=pointer]:
+                    - img [ref=e124] [cursor=pointer]
+                    - heading "Performance Reports" [level=3] [ref=e127] [cursor=pointer]
+                  - button "Generate" [ref=e129]
+                - generic [ref=e130] [cursor=pointer]:
+                  - generic [ref=e131] [cursor=pointer]:
+                    - img [ref=e132] [cursor=pointer]
+                    - heading "Tax Reports" [level=3] [ref=e135] [cursor=pointer]
+                  - button "Generate" [ref=e137]
+                - generic [ref=e138] [cursor=pointer]:
+                  - generic [ref=e139] [cursor=pointer]:
+                    - img [ref=e140] [cursor=pointer]
+                    - heading "Custom Reports" [level=3] [ref=e143] [cursor=pointer]
+                  - button "Generate" [ref=e145]
+              - generic [ref=e146]:
+                - generic [ref=e147]:
+                  - heading "Quick Reports" [level=3] [ref=e148]
+                  - paragraph [ref=e149]: Generate common reports instantly
+                - generic [ref=e151]:
+                  - button "This Month P&L" [active] [ref=e152]:
+                    - img [ref=e153]
+                    - generic [ref=e156]: This Month P&L
+                  - button "YTD Performance" [ref=e157]:
+                    - img [ref=e158]
+                    - generic [ref=e161]: YTD Performance
+                  - button "Tax Summary" [ref=e162]:
+                    - img [ref=e163]
+                    - generic [ref=e165]: Tax Summary
+                  - button "Property Comparison" [ref=e166]:
+                    - img [ref=e167]
+                    - generic [ref=e171]: Property Comparison
+                  - button "Occupancy Report" [ref=e172]:
+                    - img [ref=e173]
+                    - generic [ref=e175]: Occupancy Report
+                  - button "Expense Analysis" [ref=e176]:
+                    - img [ref=e177]
+                    - generic [ref=e180]: Expense Analysis
+  - region "Notifications alt+T"
+  - generic [ref=e185] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e186] [cursor=pointer]:
+      - img [ref=e187] [cursor=pointer]
+    - generic [ref=e190] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e191] [cursor=pointer]:
+        - generic [ref=e192] [cursor=pointer]:
+          - generic [ref=e193] [cursor=pointer]: "0"
+          - generic [ref=e194] [cursor=pointer]: "1"
+        - generic [ref=e195] [cursor=pointer]: Issue
+      - button "Collapse issues badge" [ref=e196] [cursor=pointer]:
+        - img [ref=e197] [cursor=pointer]
+  - alert [ref=e199]
+```
