@@ -7,7 +7,7 @@ import { Toaster } from 'sonner'
 import '../styles/landing-animations.css'
 import './globals.css'
 
-// Force deployment update for mobile responsiveness
+// Mobile responsiveness and enhanced reports - deployment update
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
