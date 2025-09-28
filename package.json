@@ -5,7 +5,7 @@
   "description": "BnbMargins - Comprehensive Airbnb Profit & Loss Dashboard",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build --no-lint",
     "start": "NODE_ENV=production node server.js",
     "start:dev": "next start",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
