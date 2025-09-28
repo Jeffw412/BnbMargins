@@ -71,6 +71,7 @@ export function DateRangePicker({
             className
           )}
           disabled={disabled}
+          data-testid="date-range-picker-trigger"
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {dateRange?.from ? (
@@ -86,7 +87,7 @@ export function DateRangePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="start" data-testid="date-range-picker-content">
         <Calendar
           initialFocus
           mode="range"
@@ -94,6 +95,7 @@ export function DateRangePicker({
           selected={dateRange}
           onSelect={onDateRangeChange}
           numberOfMonths={2}
+          showOutsideDays={false}
           data-testid="date-range-calendar"
         />
       </PopoverContent>

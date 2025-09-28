@@ -1,36 +1,54 @@
-"use client"
+'use client'
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DateRangePicker } from "@/components/ui/date-picker"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useSettings } from "@/contexts/settings-context"
-import { formatDate } from "@/lib/utils"
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { DateRangePicker } from '@/components/ui/date-picker'
 import {
-    Building2,
-    Calendar,
-    Clock,
-    DollarSign,
-    Download,
-    Edit,
-    Eye,
-    FileText,
-    Filter,
-    Mail,
-    Plus,
-    RefreshCw,
-    Settings,
-    Trash2,
-    TrendingDown,
-    TrendingUp
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuth } from '@/contexts/auth-context'
+import { useSettings } from '@/contexts/settings-context'
+import { reportGenerator } from '@/lib/report-generator'
+import { db } from '@/lib/supabase'
+import { formatDate } from '@/lib/utils'
+import {
+  Building2,
+  Calendar,
+  Clock,
+  DollarSign,
+  Download,
+  Edit,
+  Eye,
+  FileText,
+  Filter,
+  Mail,
+  Plus,
+  RefreshCw,
+  Settings,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { DateRange } from 'react-day-picker'
+import { toast } from 'sonner'
 
 // Mock data for reports
 const mockReportTemplates = [
@@ -42,7 +60,7 @@ const mockReportTemplates = [
     frequency: 'monthly',
     lastGenerated: '2024-01-31',
     isActive: true,
-    recipients: ['owner@example.com']
+    recipients: ['owner@example.com'],
   },
   {
     id: '2',
@@ -52,7 +70,7 @@ const mockReportTemplates = [
     frequency: 'weekly',
     lastGenerated: '2024-01-28',
     isActive: true,
-    recipients: ['manager@example.com']
+    recipients: ['manager@example.com'],
   },
   {
     id: '3',
@@ -62,7 +80,7 @@ const mockReportTemplates = [
     frequency: 'yearly',
     lastGenerated: '2023-12-31',
     isActive: false,
-    recipients: ['accountant@example.com']
+    recipients: ['accountant@example.com'],
   },
   {
     id: '4',
@@ -72,15 +90,15 @@ const mockReportTemplates = [
     frequency: 'monthly',
     lastGenerated: '2024-01-31',
     isActive: true,
-    recipients: ['owner@example.com', 'advisor@example.com']
-  }
+    recipients: ['owner@example.com', 'advisor@example.com'],
+  },
 ]
 
 const reportTypes = [
   { value: 'financial', label: 'Financial Reports', icon: DollarSign },
   { value: 'performance', label: 'Performance Reports', icon: TrendingUp },
   { value: 'tax', label: 'Tax Reports', icon: FileText },
-  { value: 'custom', label: 'Custom Reports', icon: Settings }
+  { value: 'custom', label: 'Custom Reports', icon: Settings },
 ]
 
 const frequencies = [
@@ -88,7 +106,7 @@ const frequencies = [
   { value: 'weekly', label: 'Weekly' },
   { value: 'monthly', label: 'Monthly' },
   { value: 'quarterly', label: 'Quarterly' },
-  { value: 'yearly', label: 'Yearly' }
+  { value: 'yearly', label: 'Yearly' },
 ]
 
 interface DateRange {
@@ -108,23 +126,75 @@ interface ReportTemplate {
 }
 
 export default function ReportsPage() {
+  const { user } = useAuth()
   const { currency } = useSettings()
   const [reportTemplates, setReportTemplates] = useState<ReportTemplate[]>(mockReportTemplates)
+  const [properties, setProperties] = useState<any[]>([])
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false)
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false)
   const [selectedReportType, setSelectedReportType] = useState('')
+  const [selectedFormat, setSelectedFormat] = useState('pdf')
   const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined })
   const [selectedProperties, setSelectedProperties] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState('generate')
+  const [includeCharts, setIncludeCharts] = useState(true)
+  const [includeTransactions, setIncludeTransactions] = useState(false)
+  const [includeComparisons, setIncludeComparisons] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
 
-  const handleGenerateReport = () => {
-    // In real app, this would generate and download the report
-    console.log('Generating report...', {
-      type: selectedReportType,
-      dateRange,
-      properties: selectedProperties
-    })
-    setIsGenerateDialogOpen(false)
+  // Fetch properties from database
+  useEffect(() => {
+    const fetchProperties = async () => {
+      if (!user?.id) return
+
+      try {
+        const result = await db.properties.getAll(user.id)
+        if (result.data) {
+          setProperties(result.data)
+        }
+      } catch (error) {
+        console.error('Error fetching properties:', error)
+      }
+    }
+
+    fetchProperties()
+  }, [user?.id])
+
+  const handleGenerateReport = async () => {
+    if (!selectedReportType) {
+      toast.error('Please select a report type')
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const reportTypeMap: Record<string, string> = {
+        financial: 'Financial Report',
+        performance: 'Performance Report',
+        tax: 'Tax Report',
+        custom: 'Custom Report',
+      }
+
+      await reportGenerator.generateReport({
+        type: selectedReportType as 'financial' | 'performance' | 'tax' | 'custom',
+        title: reportTypeMap[selectedReportType] || 'Report',
+        dateRange,
+        properties: selectedProperties,
+        format: selectedFormat as 'pdf' | 'excel' | 'csv',
+        includeCharts,
+        includeTransactions,
+        includeComparisons,
+        userId: user?.id, // Pass the current user ID
+      })
+
+      toast.success('Report generated successfully!')
+      setIsGenerateDialogOpen(false)
+    } catch (error) {
+      console.error('Error generating report:', error)
+      toast.error('Failed to generate report. Please try again.')
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const handleScheduleReport = () => {
@@ -136,11 +206,49 @@ export default function ReportsPage() {
   const toggleReportStatus = (reportId: string) => {
     setReportTemplates(prev =>
       prev.map(report =>
-        report.id === reportId
-          ? { ...report, isActive: !report.isActive }
-          : report
+        report.id === reportId ? { ...report, isActive: !report.isActive } : report
       )
     )
+  }
+
+  const handleQuickReport = async (type: string) => {
+    try {
+      toast.info('Generating quick report...')
+      await reportGenerator.generateQuickReport(type, user?.id)
+      toast.success('Quick report generated successfully!')
+    } catch (error) {
+      console.error('Error generating quick report:', error)
+      toast.error('Failed to generate quick report. Please try again.')
+    }
+  }
+
+  const handleDownloadHistoricalReport = async (reportName: string, reportType: string) => {
+    try {
+      toast.info('Downloading report...')
+      // For demo purposes, generate a sample report based on the historical report
+      const reportTypeMap: Record<string, 'financial' | 'performance' | 'tax'> = {
+        financial: 'financial',
+        performance: 'performance',
+        tax: 'tax',
+      }
+
+      await reportGenerator.generateReport({
+        type: reportTypeMap[reportType] || 'financial',
+        title: reportName,
+        dateRange: { from: undefined, to: undefined },
+        properties: [],
+        format: 'pdf',
+        includeCharts: true,
+        includeTransactions: true,
+        includeComparisons: false,
+        userId: user?.id, // Pass the current user ID
+      })
+
+      toast.success('Report downloaded successfully!')
+    } catch (error) {
+      console.error('Error downloading report:', error)
+      toast.error('Failed to download report. Please try again.')
+    }
   }
 
   const getReportTypeIcon = (type: string) => {
@@ -150,12 +258,18 @@ export default function ReportsPage() {
 
   const getFrequencyBadgeColor = (frequency: string) => {
     switch (frequency) {
-      case 'daily': return 'bg-blue-100 text-blue-800'
-      case 'weekly': return 'bg-green-100 text-green-800'
-      case 'monthly': return 'bg-purple-100 text-purple-800'
-      case 'quarterly': return 'bg-orange-100 text-orange-800'
-      case 'yearly': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'daily':
+        return 'bg-blue-100 text-blue-800'
+      case 'weekly':
+        return 'bg-green-100 text-green-800'
+      case 'monthly':
+        return 'bg-purple-100 text-purple-800'
+      case 'quarterly':
+        return 'bg-orange-100 text-orange-800'
+      case 'yearly':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -171,11 +285,14 @@ export default function ReportsPage() {
         </div>
         <div className="flex space-x-2">
           <Button variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
-          <Button onClick={() => setIsGenerateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button
+            onClick={() => setIsGenerateDialogOpen(true)}
+            data-testid="main-generate-report-btn"
+          >
+            <Plus className="mr-2 h-4 w-4" />
             Generate Report
           </Button>
         </div>
@@ -191,13 +308,13 @@ export default function ReportsPage() {
 
         {/* Generate Reports Tab */}
         <TabsContent value="generate" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {reportTypes.map((type) => {
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {reportTypes.map(type => {
               const Icon = type.icon
               return (
-                <Card key={type.value} className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card key={type.value} className="cursor-pointer transition-shadow hover:shadow-lg">
                   <CardHeader className="text-center">
-                    <Icon className="h-12 w-12 mx-auto mb-2 text-primary" />
+                    <Icon className="text-primary mx-auto mb-2 h-12 w-12" />
                     <CardTitle className="text-lg">{type.label}</CardTitle>
                   </CardHeader>
                   <CardContent className="text-center">
@@ -207,6 +324,7 @@ export default function ReportsPage() {
                         setSelectedReportType(type.value)
                         setIsGenerateDialogOpen(true)
                       }}
+                      data-testid={`quick-generate-${type.value}-btn`}
                     >
                       Generate
                     </Button>
@@ -223,28 +341,52 @@ export default function ReportsPage() {
               <CardDescription>Generate common reports instantly</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <Button
+                  variant="outline"
+                  className="flex h-20 flex-col space-y-2"
+                  onClick={() => handleQuickReport('monthly-pl')}
+                >
                   <FileText className="h-6 w-6" />
                   <span>This Month P&L</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
+                <Button
+                  variant="outline"
+                  className="flex h-20 flex-col space-y-2"
+                  onClick={() => handleQuickReport('ytd-performance')}
+                >
                   <TrendingUp className="h-6 w-6" />
                   <span>YTD Performance</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
+                <Button
+                  variant="outline"
+                  className="flex h-20 flex-col space-y-2"
+                  onClick={() => handleQuickReport('tax-summary')}
+                >
                   <DollarSign className="h-6 w-6" />
                   <span>Tax Summary</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
+                <Button
+                  variant="outline"
+                  className="flex h-20 flex-col space-y-2"
+                  onClick={() => handleQuickReport('property-comparison')}
+                >
                   <Building2 className="h-6 w-6" />
                   <span>Property Comparison</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
+                <Button
+                  variant="outline"
+                  className="flex h-20 flex-col space-y-2"
+                  onClick={() => handleQuickReport('occupancy-report')}
+                >
                   <Calendar className="h-6 w-6" />
                   <span>Occupancy Report</span>
                 </Button>
-                <Button variant="outline" className="h-20 flex flex-col space-y-2">
+                <Button
+                  variant="outline"
+                  className="flex h-20 flex-col space-y-2"
+                  onClick={() => handleQuickReport('expense-analysis')}
+                >
                   <TrendingDown className="h-6 w-6" />
                   <span>Expense Analysis</span>
                 </Button>
@@ -258,28 +400,28 @@ export default function ReportsPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Scheduled Reports</h2>
             <Button onClick={() => setIsScheduleDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Schedule New Report
             </Button>
           </div>
 
           <div className="grid gap-4">
-            {reportTemplates.map((template) => {
+            {reportTemplates.map(template => {
               const Icon = getReportTypeIcon(template.type)
               return (
                 <Card key={template.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <Icon className="h-8 w-8 text-primary" />
+                        <Icon className="text-primary h-8 w-8" />
                         <div>
                           <h3 className="font-semibold">{template.name}</h3>
-                          <p className="text-sm text-muted-foreground">{template.description}</p>
-                          <div className="flex items-center space-x-2 mt-2">
+                          <p className="text-muted-foreground text-sm">{template.description}</p>
+                          <div className="mt-2 flex items-center space-x-2">
                             <Badge className={getFrequencyBadgeColor(template.frequency)}>
                               {template.frequency}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-muted-foreground text-xs">
                               Last generated: {formatDate(template.lastGenerated)}
                             </span>
                           </div>
@@ -302,10 +444,10 @@ export default function ReportsPage() {
                       </div>
                     </div>
                     {template.recipients.length > 0 && (
-                      <div className="mt-3 pt-3 border-t">
+                      <div className="mt-3 border-t pt-3">
                         <div className="flex items-center space-x-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
+                          <Mail className="text-muted-foreground h-4 w-4" />
+                          <span className="text-muted-foreground text-sm">
                             Recipients: {template.recipients.join(', ')}
                           </span>
                         </div>
@@ -324,11 +466,11 @@ export default function ReportsPage() {
             <h2 className="text-xl font-semibold">Report History</h2>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
+                <Filter className="mr-2 h-4 w-4" />
                 Filter
               </Button>
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 h-4 w-4" />
                 Export List
               </Button>
             </div>
@@ -338,18 +480,51 @@ export default function ReportsPage() {
             <CardContent className="p-0">
               <div className="divide-y">
                 {[
-                  { name: 'Monthly P&L Statement - January 2024', type: 'financial', date: '2024-01-31', size: '2.4 MB', status: 'completed' },
-                  { name: 'Property Performance Summary - Week 4', type: 'performance', date: '2024-01-28', size: '1.8 MB', status: 'completed' },
-                  { name: 'Cash Flow Analysis - January 2024', type: 'financial', date: '2024-01-31', size: '1.2 MB', status: 'completed' },
-                  { name: 'Tax Preparation Report - 2023', type: 'tax', date: '2023-12-31', size: '5.6 MB', status: 'completed' },
-                  { name: 'Quarterly Performance Review - Q4 2023', type: 'performance', date: '2023-12-31', size: '3.1 MB', status: 'completed' }
+                  {
+                    name: 'Monthly P&L Statement - January 2024',
+                    type: 'financial',
+                    date: '2024-01-31',
+                    size: '2.4 MB',
+                    status: 'completed',
+                  },
+                  {
+                    name: 'Property Performance Summary - Week 4',
+                    type: 'performance',
+                    date: '2024-01-28',
+                    size: '1.8 MB',
+                    status: 'completed',
+                  },
+                  {
+                    name: 'Cash Flow Analysis - January 2024',
+                    type: 'financial',
+                    date: '2024-01-31',
+                    size: '1.2 MB',
+                    status: 'completed',
+                  },
+                  {
+                    name: 'Tax Preparation Report - 2023',
+                    type: 'tax',
+                    date: '2023-12-31',
+                    size: '5.6 MB',
+                    status: 'completed',
+                  },
+                  {
+                    name: 'Quarterly Performance Review - Q4 2023',
+                    type: 'performance',
+                    date: '2023-12-31',
+                    size: '3.1 MB',
+                    status: 'completed',
+                  },
                 ].map((report, index) => (
-                  <div key={index} className="p-4 flex items-center justify-between hover:bg-muted/50">
+                  <div
+                    key={index}
+                    className="hover:bg-muted/50 flex items-center justify-between p-4"
+                  >
                     <div className="flex items-center space-x-4">
-                      <FileText className="h-8 w-8 text-primary" />
+                      <FileText className="text-primary h-8 w-8" />
                       <div>
                         <h4 className="font-medium">{report.name}</h4>
-                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground flex items-center space-x-2 text-sm">
                           <span>{formatDate(report.date)}</span>
                           <span>•</span>
                           <span>{report.size}</span>
@@ -364,7 +539,11 @@ export default function ReportsPage() {
                       <Badge variant="default" className="bg-green-100 text-green-800">
                         {report.status}
                       </Badge>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDownloadHistoricalReport(report.name, report.type)}
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="sm">
@@ -390,7 +569,7 @@ export default function ReportsPage() {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Report Type</Label>
                 <Select value={selectedReportType} onValueChange={setSelectedReportType}>
@@ -398,7 +577,7 @@ export default function ReportsPage() {
                     <SelectValue placeholder="Select report type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {reportTypes.map((type) => (
+                    {reportTypes.map(type => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
                       </SelectItem>
@@ -409,7 +588,7 @@ export default function ReportsPage() {
 
               <div className="space-y-2">
                 <Label>Format</Label>
-                <Select defaultValue="pdf">
+                <Select value={selectedFormat} onValueChange={setSelectedFormat}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -433,15 +612,26 @@ export default function ReportsPage() {
 
             <div className="space-y-2">
               <Label>Properties</Label>
-              <Select>
-                <SelectTrigger>
+              <Select
+                value={selectedProperties.length > 0 ? selectedProperties.join(',') : 'all'}
+                onValueChange={value => {
+                  if (value === 'all') {
+                    setSelectedProperties([])
+                  } else {
+                    setSelectedProperties(value.split(','))
+                  }
+                }}
+              >
+                <SelectTrigger data-testid="property-selection-trigger">
                   <SelectValue placeholder="Select properties to include" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Properties</SelectItem>
-                  <SelectItem value="1">Downtown Loft</SelectItem>
-                  <SelectItem value="2">Beachside Villa</SelectItem>
-                  <SelectItem value="3">Mountain Cabin</SelectItem>
+                  {properties.map(property => (
+                    <SelectItem key={property.id} value={property.name}>
+                      {property.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -450,15 +640,27 @@ export default function ReportsPage() {
               <Label>Additional Options</Label>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
-                  <Switch id="include-charts" />
+                  <Switch
+                    id="include-charts"
+                    checked={includeCharts}
+                    onCheckedChange={setIncludeCharts}
+                  />
                   <Label htmlFor="include-charts">Include charts and visualizations</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="include-transactions" />
+                  <Switch
+                    id="include-transactions"
+                    checked={includeTransactions}
+                    onCheckedChange={setIncludeTransactions}
+                  />
                   <Label htmlFor="include-transactions">Include detailed transaction list</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="include-comparisons" />
+                  <Switch
+                    id="include-comparisons"
+                    checked={includeComparisons}
+                    onCheckedChange={setIncludeComparisons}
+                  />
                   <Label htmlFor="include-comparisons">Include period comparisons</Label>
                 </div>
               </div>
@@ -469,9 +671,13 @@ export default function ReportsPage() {
             <Button variant="outline" onClick={() => setIsGenerateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleGenerateReport} disabled={!selectedReportType}>
-              <Download className="h-4 w-4 mr-2" />
-              Generate Report
+            <Button
+              onClick={handleGenerateReport}
+              disabled={!selectedReportType || isGenerating}
+              data-testid="dialog-generate-report-btn"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {isGenerating ? 'Generating...' : 'Generate Report'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -482,9 +688,7 @@ export default function ReportsPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Schedule Report</DialogTitle>
-            <DialogDescription>
-              Set up automated report generation and delivery
-            </DialogDescription>
+            <DialogDescription>Set up automated report generation and delivery</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
@@ -493,7 +697,7 @@ export default function ReportsPage() {
               <Input placeholder="Enter report name" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Report Type</Label>
                 <Select>
@@ -501,7 +705,7 @@ export default function ReportsPage() {
                     <SelectValue placeholder="Select report type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {reportTypes.map((type) => (
+                    {reportTypes.map(type => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
                       </SelectItem>
@@ -517,7 +721,7 @@ export default function ReportsPage() {
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent>
-                    {frequencies.map((freq) => (
+                    {frequencies.map(freq => (
                       <SelectItem key={freq.value} value={freq.value}>
                         {freq.label}
                       </SelectItem>
@@ -552,7 +756,7 @@ export default function ReportsPage() {
               Cancel
             </Button>
             <Button onClick={handleScheduleReport}>
-              <Clock className="h-4 w-4 mr-2" />
+              <Clock className="mr-2 h-4 w-4" />
               Schedule Report
             </Button>
           </DialogFooter>

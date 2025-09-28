@@ -1,4 +1,4 @@
-# BnbMargins - Airbnb Profit & Loss Dashboard
+# BnbMargins - Mobile Responsive Dashboard - Airbnb Profit & Loss Dashboard
 
 A comprehensive Airbnb profit and loss dashboard built with Next.js, TypeScript, and Supabase. Track multiple properties, manage income and expenses, visualize performance with charts, and generate detailed reports.
 
@@ -33,17 +33,20 @@ A comprehensive Airbnb profit and loss dashboard built with Next.js, TypeScript,
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd BnbMargins
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
@@ -54,6 +57,7 @@ cp .env.example .env.local
    - Run the database migrations (coming soon)
 
 5. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -74,6 +78,7 @@ src/
 ## Development
 
 This project uses:
+
 - **ESLint** for code linting
 - **Prettier** for code formatting
 - **TypeScript** for type safety

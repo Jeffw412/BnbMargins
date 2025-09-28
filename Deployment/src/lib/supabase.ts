@@ -12,8 +12,8 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
-  }
+    detectSessionInUrl: true,
+  },
 })
 
 // For server-side operations that require elevated permissions
@@ -27,8 +27,8 @@ export const createServerClient = () => {
   return createClient<Database>(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   })
 }
 
@@ -39,8 +39,7 @@ export const auth = supabase.auth
 export const db = {
   // Properties
   properties: {
-    getAll: (userId: string) =>
-      supabase.from('properties').select('*').eq('user_id', userId),
+    getAll: (userId: string) => supabase.from('properties').select('*').eq('user_id', userId),
 
     getById: (id: string, userId: string) =>
       supabase.from('properties').select('*').eq('id', id).eq('user_id', userId).single(),
@@ -48,20 +47,79 @@ export const db = {
     create: (property: Database['public']['Tables']['properties']['Insert']) =>
       supabase.from('properties').insert(property).select().single(),
 
-    update: (id: string, updates: Database['public']['Tables']['properties']['Update'], userId: string) =>
-      supabase.from('properties').update(updates).eq('id', id).eq('user_id', userId).select().single(),
+    update: (
+      id: string,
+      updates: Database['public']['Tables']['properties']['Update'],
+      userId: string
+    ) =>
+      supabase
+        .from('properties')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select()
+        .single(),
 
     delete: (id: string, userId: string) =>
-      supabase.from('properties').delete().eq('id', id).eq('user_id', userId)
+      supabase.from('properties').delete().eq('id', id).eq('user_id', userId),
+  },
+
+  // Bookings
+  bookings: {
+    getAll: (userId: string) =>
+      supabase
+        .from('bookings')
+        .select('*')
+        .eq('user_id', userId)
+        .order('check_in_date', { ascending: false }),
+
+    getByProperty: (propertyId: string, userId: string) =>
+      supabase
+        .from('bookings')
+        .select('*')
+        .eq('property_id', propertyId)
+        .eq('user_id', userId)
+        .order('check_in_date', { ascending: false }),
+
+    getById: (id: string, userId: string) =>
+      supabase.from('bookings').select('*').eq('id', id).eq('user_id', userId).single(),
+
+    create: (booking: Database['public']['Tables']['bookings']['Insert']) =>
+      supabase.from('bookings').insert(booking).select().single(),
+
+    update: (
+      id: string,
+      updates: Database['public']['Tables']['bookings']['Update'],
+      userId: string
+    ) =>
+      supabase
+        .from('bookings')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select()
+        .single(),
+
+    delete: (id: string, userId: string) =>
+      supabase.from('bookings').delete().eq('id', id).eq('user_id', userId),
   },
 
   // Transactions
   transactions: {
     getAll: (userId: string) =>
-      supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false }),
+      supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('date', { ascending: false }),
 
     getByProperty: (propertyId: string, userId: string) =>
-      supabase.from('transactions').select('*').eq('property_id', propertyId).eq('user_id', userId).order('date', { ascending: false }),
+      supabase
+        .from('transactions')
+        .select('*')
+        .eq('property_id', propertyId)
+        .eq('user_id', userId)
+        .order('date', { ascending: false }),
 
     getById: (id: string, userId: string) =>
       supabase.from('transactions').select('*').eq('id', id).eq('user_id', userId).single(),
@@ -69,11 +127,21 @@ export const db = {
     create: (transaction: Database['public']['Tables']['transactions']['Insert']) =>
       supabase.from('transactions').insert(transaction).select().single(),
 
-    update: (id: string, updates: Database['public']['Tables']['transactions']['Update'], userId: string) =>
-      supabase.from('transactions').update(updates).eq('id', id).eq('user_id', userId).select().single(),
+    update: (
+      id: string,
+      updates: Database['public']['Tables']['transactions']['Update'],
+      userId: string
+    ) =>
+      supabase
+        .from('transactions')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select()
+        .single(),
 
     delete: (id: string, userId: string) =>
-      supabase.from('transactions').delete().eq('id', id).eq('user_id', userId)
+      supabase.from('transactions').delete().eq('id', id).eq('user_id', userId),
   },
 
   // Categories
@@ -87,21 +155,30 @@ export const db = {
     create: (category: Database['public']['Tables']['categories']['Insert']) =>
       supabase.from('categories').insert(category).select().single(),
 
-    update: (id: string, updates: Database['public']['Tables']['categories']['Update'], userId: string) =>
-      supabase.from('categories').update(updates).eq('id', id).eq('user_id', userId).select().single(),
+    update: (
+      id: string,
+      updates: Database['public']['Tables']['categories']['Update'],
+      userId: string
+    ) =>
+      supabase
+        .from('categories')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select()
+        .single(),
 
     delete: (id: string, userId: string) =>
-      supabase.from('categories').delete().eq('id', id).eq('user_id', userId)
+      supabase.from('categories').delete().eq('id', id).eq('user_id', userId),
   },
 
   // Profiles
   profiles: {
-    get: (userId: string) =>
-      supabase.from('profiles').select('*').eq('id', userId).single(),
+    get: (userId: string) => supabase.from('profiles').select('*').eq('id', userId).single(),
 
     update: (userId: string, updates: Database['public']['Tables']['profiles']['Update']) =>
-      supabase.from('profiles').update(updates).eq('id', userId).select().single()
-  }
+      supabase.from('profiles').update(updates).eq('id', userId).select().single(),
+  },
 }
 
 // Auth helpers
@@ -112,9 +189,9 @@ export const authHelpers = {
       password,
       options: {
         data: {
-          full_name: fullName
-        }
-      }
+          full_name: fullName,
+        },
+      },
     })
   },
 
@@ -127,14 +204,18 @@ export const authHelpers = {
   },
 
   getCurrentUser: async () => {
-    const { data: { user } } = await auth.getUser()
+    const {
+      data: { user },
+    } = await auth.getUser()
     return user
   },
 
   getCurrentSession: async () => {
-    const { data: { session } } = await auth.getSession()
+    const {
+      data: { session },
+    } = await auth.getSession()
     return session
-  }
+  },
 }
 
 export default supabase

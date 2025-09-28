@@ -83,9 +83,9 @@ export interface Database {
           base_rate: number
           weekday_rate: number | null
           weekend_rate: number | null
-          seasonal_rates: any | null
-          seasonal_weekday_rates: any | null
-          seasonal_weekend_rates: any | null
+          seasonal_rates: Record<string, number> | null
+          seasonal_weekday_rates: Record<string, number> | null
+          seasonal_weekend_rates: Record<string, number> | null
           default_season_name: string | null
           currency: string
           is_active: boolean
@@ -100,7 +100,7 @@ export interface Database {
           base_rate: number
           weekday_rate?: number | null
           weekend_rate?: number | null
-          seasonal_rates?: any | null
+          seasonal_rates?: Record<string, number> | null
           currency?: string
           is_active?: boolean
           created_at?: string
@@ -114,9 +114,9 @@ export interface Database {
           base_rate?: number
           weekday_rate?: number | null
           weekend_rate?: number | null
-          seasonal_rates?: any | null
-          seasonal_weekday_rates?: any | null
-          seasonal_weekend_rates?: any | null
+          seasonal_rates?: Record<string, number> | null
+          seasonal_weekday_rates?: Record<string, number> | null
+          seasonal_weekend_rates?: Record<string, number> | null
           default_season_name?: string | null
           currency?: string
           is_active?: boolean
