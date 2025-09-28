@@ -33,10 +33,10 @@ export function ThemeProvider({
   useEffect(() => {
     // Load theme from localStorage on client side
     const storedTheme = localStorage?.getItem(storageKey) as Theme
-    if (storedTheme && storedTheme !== theme) {
+    if (storedTheme && ['dark', 'light', 'system'].includes(storedTheme)) {
       setTheme(storedTheme)
     }
-  }, [])
+  }, [storageKey])
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -44,13 +44,23 @@ export function ThemeProvider({
     root.classList.remove('light', 'dark')
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
 
       root.classList.add(systemTheme)
-      return
+
+      // Listen for system theme changes
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handleChange = () => {
+        if (theme === 'system') {
+          root.classList.remove('light', 'dark')
+          root.classList.add(mediaQuery.matches ? 'dark' : 'light')
+        }
+      }
+
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
     }
 
     root.classList.add(theme)
@@ -74,8 +84,7 @@ export function ThemeProvider({
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext)
 
-  if (context === undefined)
-    throw new Error('useTheme must be used within a ThemeProvider')
+  if (context === undefined) throw new Error('useTheme must be used within a ThemeProvider')
 
   return context
 }

@@ -165,6 +165,23 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Ensure theme classes are properly applied */
+html.dark,
+html.light {
+  color-scheme: dark light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
 }
 
 /* Custom scrollbar */
@@ -399,6 +416,17 @@ body {
     min-width: 44px;
   }
 
+  /* Improve dropdown menu touch targets on mobile */
+  [role='menuitem'] {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Better theme toggle positioning on mobile */
+  [data-radix-popper-content-wrapper] {
+    z-index: 9999;
+  }
+
   /* Improve dialog spacing on mobile */
   [role='dialog'] {
     margin: 1rem;
@@ -412,6 +440,14 @@ body {
   /* Improve mobile card spacing */
   .space-y-6 > * + * {
     margin-top: 1rem;
+  }
+
+  /* Ensure theme transitions work on mobile */
+  * {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
   }
 }
 
